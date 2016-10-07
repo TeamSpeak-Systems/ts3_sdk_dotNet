@@ -1,7 +1,7 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     /// <summary>
-    /// Encryption mode used by the Teamspeak-Server
+    /// Encryption mode used by the TeamSpeak-Server
     /// </summary>
     public enum CodecEncryptionMode
     {

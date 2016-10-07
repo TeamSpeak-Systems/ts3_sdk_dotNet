@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
     /// Parameter of the microphone preprocessor.
@@ -116,7 +116,7 @@ namespace Teamspeak.Sdk.Client
             {
                 case "true": return true;
                 case "false": return false;
-                default: throw new TeamspeakException(Error.Undefined, null);
+                default: throw new TeamSpeakException(Error.Undefined, null);
             }
         }
         private int GetInt(string ident)
@@ -124,7 +124,7 @@ namespace Teamspeak.Sdk.Client
             string value = Library.Api.GetPreProcessorConfigValue(Connection, ident);
             int result;
             if (int.TryParse(value, out result) == false)
-                throw new TeamspeakException(Error.Undefined, null);
+                throw new TeamSpeakException(Error.Undefined, null);
             return result;
         }
         private float GetFloat(string ident)
@@ -134,7 +134,7 @@ namespace Teamspeak.Sdk.Client
             string value = Library.Api.GetPreProcessorConfigValue(Connection, ident);
             float result;
             if (float.TryParse(value, FloatStyle, CultureInfo.InvariantCulture, out result) == false)
-                throw new TeamspeakException(Error.Undefined, null);
+                throw new TeamSpeakException(Error.Undefined, null);
             return result;
         }
 

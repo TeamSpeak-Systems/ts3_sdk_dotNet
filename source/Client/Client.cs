@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// Represents a Client on a Teamspeak-Server
+    /// Represents a Client on a TeamSpeak-Server
     /// </summary>
     public class Client: IEquatable<Client>
     {
@@ -148,7 +148,7 @@ namespace Teamspeak.Sdk.Client
             get { return TimeSpan.FromSeconds(GetInt(ClientProperty.IdleTime)); }
         }
         /// <summary>
-        /// Default channel name used in the last <see cref="O:Teamspeak.Sdk.Client.Connection.Start"/> call. Only available for own client
+        /// Default channel name used in the last <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> call. Only available for own client
         /// </summary>
         public string DefaultChannel
         {

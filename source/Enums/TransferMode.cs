@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     /// <summary>
     /// The mode of a <see cref="Client.FileTransfer"/>

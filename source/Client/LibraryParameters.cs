@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
     /// A set of values that are used when initializing the client library  
@@ -22,7 +22,7 @@ namespace Teamspeak.Sdk.Client
         }
         
         /// <summary>
-        /// Location to the teamspeak library binary.
+        /// Location to the TeamSpeak library binary.
         /// </summary>
         public string NativeBinary { get; set; }
 
@@ -78,28 +78,28 @@ namespace Teamspeak.Sdk.Client
         /// <summary>
         /// Creates a new ClientLibraryLoadInfo-Object.
         /// </summary>
-        /// <param name="teamspeakBinaryFolder">location where the native teamspeak sdk files can be found.</param>
-        public LibraryParameters(string teamspeakBinaryFolder)
-            : this(teamspeakBinaryFolder, null)
+        /// <param name="TeamSpeakBinaryFolder">location where the native TeamSpeak sdk files can be found.</param>
+        public LibraryParameters(string TeamSpeakBinaryFolder)
+            : this(TeamSpeakBinaryFolder, null)
         {
         }
 
         /// <summary>
         /// Creates a new <see cref="LibraryParameters"/>-Object.
         /// </summary>
-        /// <param name="teamspeakBinaryFolder">location where the native teamspeak sdk files can be found.</param>
+        /// <param name="TeamSpeakBinaryFolder">location where the native TeamSpeak sdk files can be found.</param>
         /// <param name="resourcesFolder">Path pointing to the directory where the soundbackends folder is located.</param>
-        public LibraryParameters(string teamspeakBinaryFolder, string resourcesFolder)
+        public LibraryParameters(string TeamSpeakBinaryFolder, string resourcesFolder)
         {
             string nativeBinaryName;
             SupportedPlatform platform;
             if (TryGetNativeBinaryName(out nativeBinaryName, out platform) == false)
                 throw new NotSupportedException("platform is not supported");
 
-			if (teamspeakBinaryFolder == null || nativeBinaryName == null)
+			if (TeamSpeakBinaryFolder == null || nativeBinaryName == null)
                 NativeBinary = nativeBinaryName;
             else
-                NativeBinary = System.IO.Path.Combine(teamspeakBinaryFolder, nativeBinaryName);
+                NativeBinary = System.IO.Path.Combine(TeamSpeakBinaryFolder, nativeBinaryName);
             Platform = platform;
             ResourcesFolder = resourcesFolder;
         }
@@ -107,7 +107,7 @@ namespace Teamspeak.Sdk.Client
         /// <summary>
         /// Creates a new <see cref="LibraryParameters"/>-Object.
         /// </summary>
-        /// <param name="nativeBinary">Location to the teamspeak library binary.</param>
+        /// <param name="nativeBinary">Location to the TeamSpeak library binary.</param>
         /// <param name="platform">Determines which platform specific code will be executed.</param>
         /// <param name="resourcesFolder">Path pointing to the directory where the soundbackends folder is located.</param>
         public LibraryParameters(string nativeBinary, SupportedPlatform platform, string resourcesFolder)

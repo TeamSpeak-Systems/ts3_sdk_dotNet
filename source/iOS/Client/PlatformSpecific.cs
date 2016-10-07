@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Teamspeak.Sdk;
+using TeamSpeak.Sdk;
 
 internal static class PlatformSpecific
 {

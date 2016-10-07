@@ -8,10 +8,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// Represents a Channel on a Teamspeak-Server
+    /// Represents a Channel on a TeamSpeak-Server
     /// </summary>
     public class Channel: IEquatable<Channel>
     {
@@ -414,7 +414,7 @@ namespace Teamspeak.Sdk.Client
             Connection.FileTransferStatusReceived += eventHandler;
             startTask.ContinueWith(antecendent =>
             {
-                eventHandler(self, (antecendent.Exception?.InnerException as TeamspeakException)?.ErrorCode ?? Error.Undefined);
+                eventHandler(self, (antecendent.Exception?.InnerException as TeamSpeakException)?.ErrorCode ?? Error.Undefined);
             }, cancellationToken, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
 
             Error error = method(this, channelPassword, fileName, overwrite, resume, directory, returnCode, out self);

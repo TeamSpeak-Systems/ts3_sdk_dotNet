@@ -9,10 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Teamspeak.Sdk;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk;
+using TeamSpeak.Sdk.Client;
 
-namespace Teamspeak.Sdk.Client.Example
+namespace TeamSpeak.Sdk.Client.Example
 {
     class Program
     {

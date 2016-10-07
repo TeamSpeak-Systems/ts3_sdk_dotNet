@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Teamspeak.Sdk
+namespace TeamSpeak.Sdk
 {
     /// <summary>
     /// The different logging mechanisms.

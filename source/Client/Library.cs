@@ -9,10 +9,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// Teamspeak Client Library
+    /// TeamSpeak Client Library
     /// </summary>
     public static class Library
     {
@@ -57,7 +57,7 @@ namespace Teamspeak.Sdk.Client
         }
 
         /// <summary>
-        /// true if the teamspeak library has been loaded and initialized; otherwise, false
+        /// true if the TeamSpeak library has been loaded and initialized; otherwise, false
         /// </summary>
         public static bool IsInitialized
         {
@@ -69,10 +69,10 @@ namespace Teamspeak.Sdk.Client
         }
 
         /// <summary>
-        /// Initializes the teamspeak clientlib
+        /// Initializes the TeamSpeak clientlib
         /// </summary>
         /// <remarks>
-        /// Explicitly loads the teamspeak clientlib. Will be automatically invoked by the SDK when required.
+        /// Explicitly loads the TeamSpeak clientlib. Will be automatically invoked by the SDK when required.
         /// </remarks>
         public static void Initialize()
         {
@@ -80,7 +80,7 @@ namespace Teamspeak.Sdk.Client
         }
 
         /// <summary>
-        /// Initializes the teamspeak clientlib
+        /// Initializes the TeamSpeak clientlib
         /// </summary>
         /// <param name="usedLogTypes">The library can output log messages (called by <see cref="Library.Log(LogLevel, string, Connection, string)"/>) to a file (located in the logs directory relative to the client executable), to stdout or to user defined callbacks.</param>
         public static void Initialize(LogTypes usedLogTypes)
@@ -149,7 +149,7 @@ namespace Teamspeak.Sdk.Client
         }
 
         /// <summary>
-        /// Location to the teamspeak library binary.
+        /// Location to the TeamSpeak library binary.
         /// </summary>
         public static string NativeBinary { get; private set; }
 
@@ -264,7 +264,7 @@ namespace Teamspeak.Sdk.Client
             string message;
             if (Api.TryGetErrorMessage(error, out message) != Error.Ok)
                 message = error.ToString();
-            TeamspeakException result = new TeamspeakException(error, message);
+            TeamSpeakException result = new TeamSpeakException(error, message);
             if (extraMessage != null)
                 result.Data.Add("extraMessage", extraMessage);
             return result;

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Teamspeak.Sdk")]
-[assembly: AssemblyDescription("Teamspeak SDK for Xamarin")]
+[assembly: AssemblyTitle("TeamSpeak.Sdk")]
+[assembly: AssemblyDescription("TeamSpeak SDK for Xamarin")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("TeamSpeak Systems GmbH")]
-[assembly: AssemblyProduct("Teamspeak.Sdk")]
+[assembly: AssemblyProduct("TeamSpeak.Sdk")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     internal enum ClientProperty
     {
@@ -83,7 +83,7 @@
         /// </summary>
         VersionSign,
         /// <summary>
-        /// SDK use, not used by teamspeak. Hash is provided by an outside source. A channel will use the security salt + other  data to calculate a hash, which must be the same as the one provided here.
+        /// SDK use, not used by TeamSpeak. Hash is provided by an outside source. A channel will use the security salt + other  data to calculate a hash, which must be the same as the one provided here.
         /// </summary>
         SecurityHash,
     };

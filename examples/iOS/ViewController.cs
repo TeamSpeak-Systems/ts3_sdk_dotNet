@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Foundation;
-using Teamspeak.Sdk;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk;
+using TeamSpeak.Sdk.Client;
 using UIKit;
 
 namespace iOS2
@@ -25,7 +25,7 @@ namespace iOS2
 			LogView.Source = new LogSource(LogItems);
 			LoadPreferences();
 
-			// Setup Teamspeak Sdk
+			// Setup TeamSpeak Sdk
 			if (Library.IsInitialized == false)
 			{
 				Library.UserLogMessage += Library_UserLogMessage;

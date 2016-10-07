@@ -7,7 +7,7 @@
     <ProjectGuid>{1F59FBAE-F605-46AF-9443-130DA2E78C64}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Teamspeak.SDK.Example.Client</RootNamespace>
+    <RootNamespace>TeamSpeak.SDK.Example.Client</RootNamespace>
     <AssemblyName>Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -45,9 +45,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\source\Teamspeak.Sdk.csproj">
+    <ProjectReference Include="..\..\source\TeamSpeak.Sdk.csproj">
       <Project>{4bcc7af7-7365-4ee0-9793-88f696643f82}</Project>
-      <Name>Teamspeak.Sdk</Name>
+      <Name>TeamSpeak.Sdk</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

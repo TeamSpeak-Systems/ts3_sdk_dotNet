@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     internal enum TargetMode : ushort
     {

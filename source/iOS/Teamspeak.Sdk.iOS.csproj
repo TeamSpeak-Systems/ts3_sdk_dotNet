@@ -8,9 +8,9 @@
     <ProjectGuid>{E7CF75F5-920B-47C9-BDFA-89E75DD2399E}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>Teamspeak.Sdk</RootNamespace>
+    <RootNamespace>TeamSpeak.Sdk</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>Teamspeak.Sdk</AssemblyName>
+    <AssemblyName>TeamSpeak.Sdk</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -157,8 +157,8 @@
     <Compile Include="..\Enums\Visibility.cs">
       <Link>Enums\Visibility.cs</Link>
     </Compile>
-    <Compile Include="..\TeamspeakException.cs">
-      <Link>TeamspeakException.cs</Link>
+    <Compile Include="..\TeamSpeakException.cs">
+      <Link>TeamSpeakException.cs</Link>
     </Compile>
     <Compile Include="..\Vector.cs">
       <Link>Vector.cs</Link>

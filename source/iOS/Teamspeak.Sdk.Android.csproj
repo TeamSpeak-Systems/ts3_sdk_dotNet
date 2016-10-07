@@ -9,8 +9,8 @@
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Teamspeak.Sdk</RootNamespace>
-    <AssemblyName>Teamspeak.Sdk</AssemblyName>
+    <RootNamespace>TeamSpeak.Sdk</RootNamespace>
+    <AssemblyName>TeamSpeak.Sdk</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -26,7 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Debug\Teamspeak.Sdk.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\TeamSpeak.Sdk.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,7 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Release\Teamspeak.Sdk.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\TeamSpeak.Sdk.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -167,8 +167,8 @@
     <Compile Include="..\Enums\Visibility.cs">
       <Link>Enums\Visibility.cs</Link>
     </Compile>
-    <Compile Include="..\TeamspeakException.cs">
-      <Link>TeamspeakException.cs</Link>
+    <Compile Include="..\TeamSpeakException.cs">
+      <Link>TeamSpeakException.cs</Link>
     </Compile>
     <Compile Include="..\Vector.cs">
       <Link>Vector.cs</Link>

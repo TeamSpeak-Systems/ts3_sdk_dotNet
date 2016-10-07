@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     /// <summary>
     /// Error-Codes the Library can return

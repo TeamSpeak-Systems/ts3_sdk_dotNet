@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
     /// Information about the <see cref="Sdk.Client.Connection"/>
@@ -434,7 +434,7 @@ namespace Teamspeak.Sdk.Client
         }
 
         /// <summary>
-        /// Request more up to date information from the Teamspeak-Server
+        /// Request more up to date information from the TeamSpeak-Server
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task Refresh()

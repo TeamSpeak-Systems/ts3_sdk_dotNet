@@ -1,7 +1,7 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     /// <summary>
-    /// Type of the file entry on the Teamspeak-Server
+    /// Type of the file entry on the TeamSpeak-Server
     /// </summary>
     public enum FileListType
     {

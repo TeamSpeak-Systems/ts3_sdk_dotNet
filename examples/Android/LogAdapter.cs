@@ -11,7 +11,7 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 
-namespace Teamspeak.Sdk.Client.Example
+namespace TeamSpeak.Sdk.Client.Example
 {
     class LogAdapter: BaseAdapter<string>
     {

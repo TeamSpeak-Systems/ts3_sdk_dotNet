@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     /// <summary>
     /// The rate of samples in Hz

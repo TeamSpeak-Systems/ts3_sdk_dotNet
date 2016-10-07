@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("Teamspeak.Sdk.Client.Example.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("TeamSpeak.Sdk.Client.Example.Resource", IsApplication=true)]
 
-namespace Teamspeak.Sdk.Client.Example
+namespace TeamSpeak.Sdk.Client.Example
 {
 	
 	

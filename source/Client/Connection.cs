@@ -10,10 +10,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// A connection to a Teamspeak-Server
+    /// A connection to a TeamSpeak-Server
     /// </summary>
     public class Connection: IDisposable
     {
@@ -49,7 +49,7 @@ namespace Teamspeak.Sdk.Client
         public ICollection<Client> AllClients { get { return Library.Api.GetClientList(this)?.AsReadOnly(); } }
 
         /// <summary>
-        /// After calling <see cref="O:Teamspeak.Sdk.Client.Connection.Start"/> the client will be informed of the connection status changes by the event
+        /// After calling <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> the client will be informed of the connection status changes by the event
         /// </summary>
         public event ConnectStatusChangeEventHandler StatusChanged;
 
@@ -233,7 +233,7 @@ namespace Teamspeak.Sdk.Client
         public event CheckServerUniqueIdentifierEventHandler CheckServerUniqueIdentifier;
 
         /// <summary>
-        /// Called when a file finished being transfered, triggered by <see cref="O:Teamspeak.Sdk.Client.Channel.SendFile"/>  or <see cref="O:Teamspeak.Sdk.Client.Channel.RequestFile"/> has finished or aborted with an error.
+        /// Called when a file finished being transfered, triggered by <see cref="O:TeamSpeak.Sdk.Client.Channel.SendFile"/>  or <see cref="O:TeamSpeak.Sdk.Client.Channel.RequestFile"/> has finished or aborted with an error.
         /// </summary>
         public event FileTransferStatusEventHandler FileTransferStatusReceived;
 
@@ -1049,7 +1049,7 @@ namespace Teamspeak.Sdk.Client
             {
                 if (antecendent.IsFaulted)
                 {
-                    TeamspeakException exception = antecendent.Exception.InnerException as TeamspeakException;
+                    TeamSpeakException exception = antecendent.Exception.InnerException as TeamSpeakException;
                     if (exception == null)
                     {
                         System.Diagnostics.Debug.Assert(false);

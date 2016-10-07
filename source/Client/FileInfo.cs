@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// Information about a file or directory stored on a teamspeak server
+    /// Information about a file or directory stored on a TeamSpeak server
     /// </summary>
     public class FileInfo
     {

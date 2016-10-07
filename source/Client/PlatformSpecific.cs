@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Teamspeak.Sdk;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk;
+using TeamSpeak.Sdk.Client;
 
 internal static class PlatformSpecific
 {

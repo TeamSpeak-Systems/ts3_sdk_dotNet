@@ -6,12 +6,12 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
-using Teamspeak.Sdk;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk;
+using TeamSpeak.Sdk.Client;
 
-namespace Teamspeak.Sdk.Client.Example
+namespace TeamSpeak.Sdk.Client.Example
 {
-    [Activity(Label = "Teamspeak SDK", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "TeamSpeak SDK", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity
     {
         private ListView Log;
@@ -33,7 +33,7 @@ namespace Teamspeak.Sdk.Client.Example
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            // Setup Teamspeak Sdk
+            // Setup TeamSpeak Sdk
             if (Library.IsInitialized == false)
             {
                 Library.UserLogMessage += Library_UserLogMessage;
@@ -67,7 +67,7 @@ namespace Teamspeak.Sdk.Client.Example
 
         private void LoadPreferences()
         {
-            ISharedPreferences preferences = GetSharedPreferences("Teamspeak.Sdk.Example", FileCreationMode.Private);
+            ISharedPreferences preferences = GetSharedPreferences("TeamSpeak.Sdk.Example", FileCreationMode.Private);
             Identity = preferences.GetString("Identity", null);
             if (string.IsNullOrEmpty(Identity))
             {
@@ -95,7 +95,7 @@ namespace Teamspeak.Sdk.Client.Example
                 {
                     await Connection.Start(Identity, host, 9987, "User", serverPassword: "secret");
                 }
-                catch (TeamspeakException exception)
+                catch (TeamSpeakException exception)
                 {
                     AppendToLog($"Connection failed: {exception.Message}");
                 }
@@ -106,7 +106,7 @@ namespace Teamspeak.Sdk.Client.Example
                 {
                     await Connection.Stop();
                 }
-                catch (TeamspeakException exception)
+                catch (TeamSpeakException exception)
                 {
                     AppendToLog($"Disconnect failed: {exception.Message}");
                 }

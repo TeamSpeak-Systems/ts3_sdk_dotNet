@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Teamspeak.Sdk.Client
+namespace TeamSpeak.Sdk.Client
 {
     /// <summary>
-    /// Used after calling <see cref="O:Teamspeak.Sdk.Client.Connection.Start"/> to inform the <see cref="Client"/> of the connection status changes.
+    /// Used after calling <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> to inform the <see cref="Client"/> of the connection status changes.
     /// </summary>
     /// <param name="connection"><see cref="Connection"/> whose status changed</param>
     /// <param name="newStatus">the new status of the connection</param>
@@ -270,7 +270,7 @@ namespace Teamspeak.Sdk.Client
     /// <summary>
     /// Used to calculate volume attenuation for distance in 3D positioning of a wave file.
     /// </summary>
-    /// <param name="wave">the <see cref="WaveHandle"/> for the playing wave file, returned by <see cref="Teamspeak.Sdk.Client.Connection.PlayWaveFile(string, bool)"/>.</param>
+    /// <param name="wave">the <see cref="WaveHandle"/> for the playing wave file, returned by <see cref="TeamSpeak.Sdk.Client.Connection.PlayWaveFile(string, bool)"/>.</param>
     /// <param name="distance">The distance between the listener and the client.</param>
     /// <param name="volume">The volume which the Client Lib calculated.</param>
     public delegate void Custom3dRolloffCalculationWaveEventHandler(WaveHandle wave, float distance, ref float volume);

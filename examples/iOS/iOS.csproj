@@ -146,9 +146,9 @@
     <Compile Include="LogSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\iOS\Teamspeak.Sdk.iOS.csproj">
+    <ProjectReference Include="..\..\Source\iOS\TeamSpeak.Sdk.iOS.csproj">
       <Project>{e7cf75f5-920b-47c9-bdfa-89e75dd2399e}</Project>
-      <Name>Teamspeak.Sdk.iOS</Name>
+      <Name>TeamSpeak.Sdk.iOS</Name>
       <IsAppExtension>false</IsAppExtension>
       <IsWatchApp>false</IsWatchApp>
     </ProjectReference>

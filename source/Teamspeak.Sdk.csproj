@@ -7,8 +7,8 @@
     <ProjectGuid>{4BCC7AF7-7365-4EE0-9793-88F696643F82}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Teamspeak.Sdk</RootNamespace>
-    <AssemblyName>Teamspeak.Sdk</AssemblyName>
+    <RootNamespace>TeamSpeak.Sdk</RootNamespace>
+    <AssemblyName>TeamSpeak.Sdk</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -22,7 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Debug\Teamspeak.Sdk.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\TeamSpeak.Sdk.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Release\Teamspeak.Sdk.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\TeamSpeak.Sdk.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -97,7 +97,7 @@
     <Compile Include="Client\ConnectionInfo.cs" />
     <Compile Include="Client\FileTransfer.cs" />
     <Compile Include="Client\Library.cs" />
-    <Compile Include="TeamspeakException.cs" />
+    <Compile Include="TeamSpeakException.cs" />
     <Compile Include="Client\Client.cs" />
     <Compile Include="Client\Preprocessor.cs" />
     <Compile Include="Client\WaveHandle.cs" />

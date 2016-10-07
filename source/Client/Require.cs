@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk.Client;
 
 internal static class Require
 {

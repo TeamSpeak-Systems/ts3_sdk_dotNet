@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Teamspeak.Sdk
+namespace TeamSpeak.Sdk
 {
     /// <summary>
     ///  A vector in 3D space

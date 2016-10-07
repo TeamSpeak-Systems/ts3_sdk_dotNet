@@ -6,10 +6,10 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Teamspeak.Sdk;
-using Teamspeak.Sdk.Client;
+using TeamSpeak.Sdk;
+using TeamSpeak.Sdk.Client;
 
-namespace Teamspeak.Sdk.Client.Example
+namespace TeamSpeak.Sdk.Client.Example
 {
     static class Program
     {
@@ -79,9 +79,9 @@ namespace Teamspeak.Sdk.Client.Example
             }
             catch (AggregateException e)
             {
-                if (e.InnerException is TeamspeakException)
+                if (e.InnerException is TeamSpeakException)
                 {
-                    Error errorCode = ((TeamspeakException)e.InnerException).ErrorCode;
+                    Error errorCode = ((TeamSpeakException)e.InnerException).ErrorCode;
                     Console.WriteLine("Failed to connect to server: {0}", errorCode);
                     return;
                 }
@@ -106,7 +106,7 @@ namespace Teamspeak.Sdk.Client.Example
                     {
                         item.Method();
                     }
-                    catch (TeamspeakException e)
+                    catch (TeamSpeakException e)
                     {
                         Console.WriteLine($"Error in {item.Method.Method.Name}: {e.Message} ({e.ErrorCode})");
                     }
@@ -438,7 +438,7 @@ namespace Teamspeak.Sdk.Client.Example
                 Connection.Self.MoveTo(channel, password);
                 Console.WriteLine($"Switching into channel {channel.Name}({channel.ID})");
             }
-            catch (TeamspeakException e)
+            catch (TeamSpeakException e)
             {
                 Console.WriteLine($"Error moving client into channel channel: {e.ErrorCode}");
             }
@@ -510,7 +510,7 @@ namespace Teamspeak.Sdk.Client.Example
                 Console.WriteLine("Created channel");
                 Console.WriteLine();
             }
-            catch (TeamspeakException e)
+            catch (TeamSpeakException e)
             {
                 Console.WriteLine();
                 Console.WriteLine($"Error creating channel: {e.ErrorCode}");
@@ -528,7 +528,7 @@ namespace Teamspeak.Sdk.Client.Example
                 channel.Delete().Wait();
                 Console.WriteLine($"Deleted channel {name}");
             }
-            catch (TeamspeakException e)
+            catch (TeamSpeakException e)
             {
                 Console.WriteLine($"Error deleting channel: {e.ErrorCode}");
             }
@@ -545,7 +545,7 @@ namespace Teamspeak.Sdk.Client.Example
                 channel.Name = name;
                 Console.WriteLine($"Renamed channel {oldName} to {name}");
             }
-            catch (TeamspeakException e)
+            catch (TeamSpeakException e)
             {
                 Console.WriteLine($"Error renaming channel: {e.ErrorCode}");
             }

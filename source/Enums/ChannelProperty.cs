@@ -1,4 +1,4 @@
-﻿namespace Teamspeak.Sdk
+﻿namespace TeamSpeak.Sdk
 {
     internal enum ChannelProperty
     {
@@ -63,7 +63,7 @@
         /// </summary>
         CodecIsUnencrypted,
         /// <summary>
-        /// Not available client side, not used in teamspeak, only SDK. Sets the options+salt for security hash.
+        /// Not available client side, not used in TeamSpeak, only SDK. Sets the options+salt for security hash.
         /// </summary>
         SecuritySalt,
         /// <summary>
