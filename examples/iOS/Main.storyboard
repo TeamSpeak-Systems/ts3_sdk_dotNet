@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="5">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6204"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="4">
+            <objects>
+                <viewController id="5" sceneMemberID="viewController" customClass="ViewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="2"/>
+                        <viewControllerLayoutGuide type="bottom" id="3"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="12" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="20" y="20" width="560" height="522"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes/>
+                            </tableView>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="127.0.0.1" borderStyle="roundedRect" minimumFontSize="17" id="15" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="20" y="550" width="492" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="16" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="520" y="550" width="60" height="30"/>
+                                <state key="normal" title="Login">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <constraints>
+                                    <constraint id="23" firstItem="16" firstAttribute="width" constant="60"/>
+                                </constraints>
+                                <connections>
+                                    <action selector="Button_TouchUpInside:" destination="5" id="33" eventType="touchUpInside"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint id="17" firstItem="6" firstAttribute="bottom" secondItem="16" secondAttribute="bottom" constant="20" symbolic="YES"/>
+                            <constraint id="18" firstItem="6" firstAttribute="trailing" secondItem="16" secondAttribute="trailing" constant="20" symbolic="YES"/>
+                            <constraint id="24" firstItem="6" firstAttribute="bottom" secondItem="15" secondAttribute="bottom" constant="20" symbolic="YES"/>
+                            <constraint id="25" firstItem="16" firstAttribute="leading" secondItem="15" secondAttribute="trailing" constant="8" symbolic="YES"/>
+                            <constraint id="26" firstItem="15" firstAttribute="leading" secondItem="6" secondAttribute="leading" constant="20" symbolic="YES"/>
+                            <constraint id="27" firstItem="16" firstAttribute="top" secondItem="12" secondAttribute="bottom" constant="8" symbolic="YES"/>
+                            <constraint id="28" firstItem="6" firstAttribute="trailing" secondItem="12" secondAttribute="trailing" constant="20" symbolic="YES"/>
+                            <constraint id="29" firstItem="12" firstAttribute="top" secondItem="6" secondAttribute="top" constant="20" symbolic="YES"/>
+                            <constraint id="30" firstItem="12" firstAttribute="leading" secondItem="6" secondAttribute="leading" constant="20" symbolic="YES"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="Button" destination="16" id="name-outlet-16"/>
+                        <outlet property="LogView" destination="12" id="name-outlet-12"/>
+                        <outlet property="EditHost" destination="15" id="name-outlet-15"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="88" y="-96"/>
+        </scene>
+    </scenes>
+</document>

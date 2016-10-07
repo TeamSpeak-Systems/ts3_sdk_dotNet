@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4BCC7AF7-7365-4EE0-9793-88F696643F82}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Teamspeak.Sdk</RootNamespace>
+    <AssemblyName>Teamspeak.Sdk</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\Teamspeak.Sdk.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Teamspeak.Sdk.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Client\ChannelTracker.cs" />
+    <Compile Include="Client\LibraryParameters.cs" />
+    <Compile Include="Client\PlatformSpecific.cs" />
+    <Compile Include="Client\SdkHandle.cs" />
+    <Compile Include="Enums\SupportedPlatform.cs" />
+    <Compile Include="Client\EventHelper.cs" />
+    <Compile Include="Client\Require.cs" />
+    <Compile Include="Client\ReadonlyChannelCollection.cs" />
+    <Compile Include="Enums\CodecEncryptionMode.cs" />
+    <Compile Include="Enums\CodecType.cs" />
+    <Compile Include="Enums\ChannelProperty.cs" />
+    <Compile Include="Enums\Frequency.cs" />
+    <Compile Include="Enums\TransferMode.cs" />
+    <Compile Include="Enums\ClientProperty.cs" />
+    <Compile Include="Enums\VirtualServerProperty.cs" />
+    <Compile Include="Enums\ConnectionProperty.cs" />
+    <Compile Include="Enums\LogLevel.cs" />
+    <Compile Include="Enums\LogTypes.cs" />
+    <Compile Include="Enums\ConnectStatus.cs" />
+    <Compile Include="Enums\FileTransferState.cs" />
+    <Compile Include="Enums\Speakers.cs" />
+    <Compile Include="Enums\TalkStatus.cs" />
+    <Compile Include="Enums\TargetMode.cs" />
+    <Compile Include="Enums\Error.cs" />
+    <Compile Include="Enums\Visibility.cs" />
+    <Compile Include="Client\EventHandlers.cs" />
+    <Compile Include="Client\FileInfo.cs" />
+    <Compile Include="Client\Native.cs" />
+    <Compile Include="Client\NativeMethods.cs" />
+    <Compile Include="Client\NativeEvents.cs" />
+    <Compile Include="Client\ConnectionCaches.cs" />
+    <Compile Include="Client\SoundDevice.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Client\Channel.cs" />
+    <Compile Include="Client\ConnectionInfo.cs" />
+    <Compile Include="Client\FileTransfer.cs" />
+    <Compile Include="Client\Library.cs" />
+    <Compile Include="TeamspeakException.cs" />
+    <Compile Include="Client\Client.cs" />
+    <Compile Include="Client\Preprocessor.cs" />
+    <Compile Include="Client\WaveHandle.cs" />
+    <Compile Include="Client\Connection.cs" />
+    <Compile Include="Enums\FileListType.cs" />
+    <Compile Include="Vector.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
