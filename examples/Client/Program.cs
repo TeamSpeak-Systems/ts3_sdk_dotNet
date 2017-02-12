@@ -122,7 +122,7 @@ namespace TeamSpeak.Sdk.Client.Example
 
         private static void Initialize()
         {
-            LibraryParameters parameters = new LibraryParameters("../../../../ts3_sdk_3.0.3.2/bin/");
+            LibraryParameters parameters = new LibraryParameters("../../../../ts3_sdk_3.0.4/bin/");
             parameters.UsedLogTypes = LogTypes.File | LogTypes.Console | LogTypes.Userlogging;
             Library.Initialize(parameters);
 
@@ -661,7 +661,7 @@ namespace TeamSpeak.Sdk.Client.Example
             Connection result = Library.SpawnNewConnection();
             result.OpenCapture();
             result.OpenPlayback();
-            result.LocalTestMode = true;
+            result.LocalTestMode = LocalTestMode.LocalVoice;
             return result;
         }
     }

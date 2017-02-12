@@ -51,24 +51,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\ts3_sdk_3.0.3.2\bin\libts3client_linux_amd64.so">
-      <Link>libts3client_linux_amd64.so</Link>
+    <None Include="..\..\ts3_sdk_3.0.4\bin\linux\x86\libts3client.so">
+      <Link>libts3client.so</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\ts3_sdk_3.0.3.2\bin\libts3client_linux_x86.so">
-      <Link>libts3client_linux_x86.so</Link>
+    <None Include="..\..\ts3_sdk_3.0.4\bin\mac\libts3client.dylib">
+      <Link>libts3client.dylib</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\..\ts3_sdk_3.0.3.2\bin\libts3client_mac.dylib">
-      <Link>libts3client_mac.dylib</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="..\..\ts3_sdk_3.0.3.2\bin\ts3client_win32.dll">
-      <Link>ts3client_win32.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ts3_sdk_3.0.3.2\bin\ts3client_win64.dll">
-      <Link>ts3client_win64.dll</Link>
+    <Content Include="..\..\ts3_sdk_3.0.4\bin\windows\win32\ts3client.dll">
+      <Link>ts3client.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

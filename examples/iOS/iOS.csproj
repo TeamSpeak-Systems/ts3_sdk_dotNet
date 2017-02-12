@@ -28,7 +28,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
-    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.3.2/iOS/ -lc++ -lts3client_ios_sdk_simulator"</MtouchExtraArgs>
+    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.4/lib/ios/simulator/ -lc++ -llibts3client"</MtouchExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>pdbonly</DebugType>
@@ -55,7 +55,7 @@
     <MtouchUseThumb>False</MtouchUseThumb>
     <MtouchEnableBitcode>False</MtouchEnableBitcode>
     <OptimizePNGs>True</OptimizePNGs>
-    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.3.2/iOS/ -lc++ -lts3client_ios_sdk_device"</MtouchExtraArgs>
+    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.4/lib/ios/device/ -lc++ -llibts3client"</MtouchExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>pdbonly</DebugType>
@@ -76,7 +76,7 @@
     <MtouchDebug>False</MtouchDebug>
     <MtouchProfiling>False</MtouchProfiling>
     <MtouchFastDev>False</MtouchFastDev>
-    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.3.2/iOS/ -lc++ -lts3client_ios_sdk_simulator"</MtouchExtraArgs>
+    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.4/lib/ios/simulator/ -lc++ -llibts3client"</MtouchExtraArgs>
     <MtouchUseLlvm>False</MtouchUseLlvm>
     <MtouchUseThumb>False</MtouchUseThumb>
     <MtouchEnableBitcode>False</MtouchEnableBitcode>
@@ -105,7 +105,7 @@
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <MtouchSdkVersion>10.0</MtouchSdkVersion>
     <MtouchProfiling>False</MtouchProfiling>
-    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.3.2/iOS/ -lc++ -lts3client_ios_sdk_device"</MtouchExtraArgs>
+    <MtouchExtraArgs>-gcc_flags "-L${ProjectDir}/../../ts3_sdk_3.0.4/lib/ios/device/ -lc++ -llibts3client"</MtouchExtraArgs>
     <MtouchUseLlvm>False</MtouchUseLlvm>
     <MtouchUseThumb>False</MtouchUseThumb>
     <MtouchEnableBitcode>False</MtouchEnableBitcode>
