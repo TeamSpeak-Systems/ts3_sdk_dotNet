@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -13,18 +14,18 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Returns the name of the native sdk binary that fits the current environment
         /// </summary>
-        /// <param name="name">name of the native sdk binary</param>
+        /// <param name="names">possible names of the native sdk binary</param>
         /// <param name="platform">detected platform</param>
         /// <returns>true if a matching binary exists</returns>
-        public static bool TryGetNativeBinaryName(out string name, out SupportedPlatform platform)
+        public static bool TryGetNativeBinaryName(out string[] names, out SupportedPlatform platform)
         {
-            return PlatformSpecific.TryGetNativeBinaryName(out name, out platform);
+            return PlatformSpecific.TryGetNativeBinaryName(out names, out platform);
         }
         
         /// <summary>
-        /// Location to the TeamSpeak library binary.
+        /// Possible locations to the TeamSpeak library binary.
         /// </summary>
-        public string NativeBinary { get; set; }
+        public string[] PossibleNativeBinaryLocations { get; set; }
 
         /// <summary>
         /// Determines which platform specific code will be executed.
@@ -87,32 +88,44 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Creates a new <see cref="LibraryParameters"/>-Object.
         /// </summary>
-        /// <param name="TeamSpeakBinaryFolder">location where the native TeamSpeak sdk files can be found.</param>
+        /// <param name="teamSpeakBinaryFolder">location where the native TeamSpeak sdk files can be found.</param>
         /// <param name="resourcesFolder">Path pointing to the directory where the soundbackends folder is located.</param>
-        public LibraryParameters(string TeamSpeakBinaryFolder, string resourcesFolder)
+        public LibraryParameters(string teamSpeakBinaryFolder, string resourcesFolder)
         {
-            string nativeBinaryName;
+            string[] nativeBinaryLocations;
             SupportedPlatform platform;
-            if (TryGetNativeBinaryName(out nativeBinaryName, out platform) == false)
+            if (TryGetNativeBinaryName(out nativeBinaryLocations, out platform) == false)
                 throw new NotSupportedException("platform is not supported");
 
-			if (TeamSpeakBinaryFolder == null || nativeBinaryName == null)
-                NativeBinary = nativeBinaryName;
-            else
-                NativeBinary = System.IO.Path.Combine(TeamSpeakBinaryFolder, nativeBinaryName);
+            PossibleNativeBinaryLocations = ExtendPossibleLocations(nativeBinaryLocations, teamSpeakBinaryFolder);
             Platform = platform;
             ResourcesFolder = resourcesFolder;
+        }
+
+        private string[] ExtendPossibleLocations(string[] nativeBinaryLocations, string teamSpeakBinaryFolder)
+        {
+            IEnumerable<string> result = nativeBinaryLocations;
+            if (teamSpeakBinaryFolder != null)
+            {
+                result = result.Select(s => s == null ? null : Path.Combine(teamSpeakBinaryFolder, s));
+            }
+            if (teamSpeakBinaryFolder == null || Path.IsPathRooted(teamSpeakBinaryFolder) == false)
+            {
+                string root = Path.GetDirectoryName(Path.GetFullPath(typeof(SdkHandle).Assembly.Location));
+                result = result.Concat(result.Select(s => s == null ? null : Path.Combine(root, s)));
+            }
+            return result.ToArray();
         }
 
         /// <summary>
         /// Creates a new <see cref="LibraryParameters"/>-Object.
         /// </summary>
-        /// <param name="nativeBinary">Location to the TeamSpeak library binary.</param>
+        /// <param name="nativeBinaryLocation">Location to the TeamSpeak library binary.</param>
         /// <param name="platform">Determines which platform specific code will be executed.</param>
         /// <param name="resourcesFolder">Path pointing to the directory where the soundbackends folder is located.</param>
-        public LibraryParameters(string nativeBinary, SupportedPlatform platform, string resourcesFolder)
+        public LibraryParameters(string nativeBinaryLocation, SupportedPlatform platform, string resourcesFolder)
         {
-            NativeBinary = nativeBinary;
+            PossibleNativeBinaryLocations = new string[] { nativeBinaryLocation };
             Platform = platform;
             ResourcesFolder = resourcesFolder;
         }

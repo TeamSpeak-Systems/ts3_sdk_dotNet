@@ -9,12 +9,11 @@ namespace TeamSpeak.Sdk.Client
 {
     internal class SdkHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public static SdkHandle Load(SupportedPlatform platform, string fileName)
+        public static SdkHandle Load(SupportedPlatform platform, string[] possibleNames)
         {
             IntPtr handle;
             string location;
-            PlatformSpecific.LoadDynamicLibrary(platform, fileName, out handle, out location);
-            if (location == null) location = System.IO.Path.GetDirectoryName(fileName);
+            PlatformSpecific.LoadDynamicLibrary(platform, possibleNames, out handle, out location);
             return new SdkHandle(handle, platform, location);
         }
 

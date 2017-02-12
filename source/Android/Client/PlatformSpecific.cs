@@ -26,13 +26,20 @@ internal static class PlatformSpecific
         public static extern int dlclose(IntPtr id);
     }
 
-    public static void LoadDynamicLibrary(SupportedPlatform platform, string fileName, out IntPtr handle, out string location)
+    public static void LoadDynamicLibrary(SupportedPlatform platform, string[] possibleNames, out IntPtr handle, out string location)
     {
         if (platform != SupportedPlatform.Android) throw new NotSupportedException();
-        handle = NativeUnixMehods.dlopen(fileName, 2 /* RTLD_NOW */);
-        if (handle == IntPtr.Zero)
-            throw new DllNotFoundException(fileName, GetLastError());
-        location = fileName;
+        foreach (string possibleName in possibleNames)
+        {
+            handle = NativeUnixMehods.dlopen(possibleName, 2 /* RTLD_NOW */);
+            if (handle != IntPtr.Zero)
+            {
+                location = possibleName;
+                return;
+            }
+        }
+        string message = string.Join(", ", possibleNames);
+        throw new DllNotFoundException(message, GetLastError());
     }
 
     public static void GetLibraryMethod<T>(SupportedPlatform platform, IntPtr handle, string name, out T t)
@@ -60,31 +67,21 @@ internal static class PlatformSpecific
     /// <summary>
     /// Returns the name of the native sdk binary that fits the current environment
     /// </summary>
-    /// <param name="name">name of the native sdk binary</param>
+    /// <param name="names">possible names of the native sdk binary</param>
     /// <param name="platform">detected platform</param>
     /// <returns>true if a matching binary exists</returns>
-    public static bool TryGetNativeBinaryName(out string name, out SupportedPlatform platform)
+    public static bool TryGetNativeBinaryName(out string[] names, out SupportedPlatform platform)
     {
         platform = SupportedPlatform.Android;
 
         // check if platform is 64-, 32-, or something else bit
-        bool is64Bit;
         switch (Native.SizeOfPointer)
         {
-            case 8: is64Bit = true; break;
-            case 4: is64Bit = false; break;
-            default: name = null; platform = 0; return false;
+            case 8: case 4: break;
+            default: names = null; platform = 0; return false;
         }
 
-        if (is64Bit == false)
-        {
-            name = "libts3client_android.so";
-            return true;
-        }
-        else
-        {
-            name = null;
-            return false;
-        }
+        names = new string[] { "libts3client.so", "libts3client_android.so" };
+        return true;
     }
 }

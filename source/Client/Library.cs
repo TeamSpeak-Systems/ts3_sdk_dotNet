@@ -109,7 +109,7 @@ namespace TeamSpeak.Sdk.Client
                     ProcessExitRegistered = true;
                 }
                 Platform = parameters.Platform;
-                Handle = SdkHandle.Load(Platform, parameters.NativeBinary);
+                Handle = SdkHandle.Load(Platform, parameters.PossibleNativeBinaryLocations);
                 NativeBinary = Handle.Location;
                 FunctionRarePointers = parameters.FunctionRarePointers;
                 UsedLogTypes = parameters.UsedLogTypes;

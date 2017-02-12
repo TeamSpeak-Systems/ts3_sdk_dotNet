@@ -66,36 +66,46 @@ internal static class PlatformSpecific
         }
     }
 
-    public static void LoadDynamicLibrary(SupportedPlatform platform, string fileName, out IntPtr handle, out string location)
+    public static void LoadDynamicLibrary(SupportedPlatform platform, string[] possibleNames, out IntPtr handle, out string location)
+    {
+        foreach (string possibleName in possibleNames)
+        {
+            if (LoadDynamicLibrary(platform, possibleName, out handle, out location))
+                return;
+        }
+        string message = string.Join(", ", possibleNames);
+        switch (platform)
+        {
+            case SupportedPlatform.Windows:
+                throw new DllNotFoundException(message, GetLastWindowsError());
+            case SupportedPlatform.Linux:
+            case SupportedPlatform.MacOSX:
+                throw new DllNotFoundException(message, GetLastErrorUnix());
+            default: throw new NotSupportedException();
+        }
+    }
+    private static bool LoadDynamicLibrary(SupportedPlatform platform, string name, out IntPtr handle, out string location)
     {
         switch (platform)
         {
             case SupportedPlatform.Windows:
-                handle = LoadWindows(fileName);
+                handle = NativeWindowsMethods.LoadLibrary(name);
                 if (handle == IntPtr.Zero)
-                    throw new DllNotFoundException(fileName, GetLastWindowsError());
-                location = GetLocationWindows(handle);
-                break;
+                    goto default;
+                location = GetLocationWindows(handle) ?? name;
+                return true;
             case SupportedPlatform.Linux:
             case SupportedPlatform.MacOSX:
-                handle = LoadUnix(fileName);
+                handle = NativeUnixMehods.dlopen(name, 2 /* RTLD_NOW */);
                 if (handle == IntPtr.Zero)
-                    throw new DllNotFoundException(fileName, GetLastErrorUnix());
-                location = GetLocationUnix(handle);
-                break;
-            default: throw new NotSupportedException();
+                    goto default;
+                location = GetLocationUnix(handle) ?? name;
+                return true;
+            default:
+                handle = IntPtr.Zero;
+                location = null;
+                return false;
         }
-    }
-
-    private static IntPtr LoadWindows(string fileName)
-    {
-        IntPtr result = NativeWindowsMethods.LoadLibrary(fileName);
-        if (result == IntPtr.Zero && System.IO.Path.IsPathRooted(fileName) == false)
-        {
-            string directory = Path.GetDirectoryName(Path.GetFullPath(typeof(SdkHandle).Assembly.Location));
-            return LoadWindows(Path.Combine(directory, fileName));
-        }
-        return result;
     }
 
     private static string GetLocationWindows(IntPtr handle)
@@ -108,17 +118,6 @@ internal static class PlatformSpecific
             return null;
         }
         return Encoding.Default.GetString(bytes, 0, length);
-    }
-
-    private static IntPtr LoadUnix(string fileName)
-    {
-        IntPtr result = NativeUnixMehods.dlopen(fileName, 2 /* RTLD_NOW */);
-        if (result == IntPtr.Zero && Path.IsPathRooted(fileName) == false)
-        {
-            string directory = Path.GetDirectoryName(Path.GetFullPath(typeof(SdkHandle).Assembly.Location));
-            return LoadUnix(Path.Combine(directory, fileName));
-        }
-        return result;
     }
 
     private static string GetLocationUnix(IntPtr handle)
@@ -211,10 +210,10 @@ internal static class PlatformSpecific
     /// <summary>
     /// Returns the name of the native sdk binary that fits the current environment
     /// </summary>
-    /// <param name="name">name of the native sdk binary</param>
+    /// <param name="names">possible names of the native sdk binary</param>
     /// <param name="platform">detected platform</param>
     /// <returns>true if a matching binary exists</returns>
-    public static bool TryGetNativeBinaryName(out string name, out SupportedPlatform platform)
+    public static bool TryGetNativeBinaryName(out string[] names, out SupportedPlatform platform)
     {
         // check if OS is 64-, 32-, or something else bit
         bool is64Bit;
@@ -222,7 +221,7 @@ internal static class PlatformSpecific
         {
             case 8: is64Bit = true; break;
             case 4: is64Bit = false; break;
-            default: name = null; platform = 0; return false;
+            default: names = null; platform = 0; return false;
         }
         // check if operating system is supported
         OperatingSystem operatingSystem = Environment.OSVersion;
@@ -237,14 +236,24 @@ internal static class PlatformSpecific
                     break;
                 }
                 else goto default;
-            default: platform = 0; name = null; return false;
+            default: platform = 0; names = null; return false;
         }
         // get name of the binary
         switch (platform)
         {
-            case SupportedPlatform.MacOSX: name = "libts3client_mac.dylib"; break;
-            case SupportedPlatform.Linux: name = is64Bit ? "libts3client_linux_amd64.so" : "libts3client_linux_x86"; break;
-            case SupportedPlatform.Windows: name = is64Bit ? "ts3client_win64.dll" : "ts3client_win32.dll"; break;
+            case SupportedPlatform.MacOSX:
+                names = new string[] { "mac/libts3client.dylib", "libts3client_mac.dylib" };
+                break;
+            case SupportedPlatform.Linux:
+                names = is64Bit 
+                    ? new string[] { "linux/amd64/libts3client.so", "libts3client_linux_amd64.so" }
+                    : new string[] { "linux/x86/libts3client.so", "libts3client_linux_x86.so" };
+                break;
+            case SupportedPlatform.Windows:
+                names = is64Bit
+                    ? new string[] { "windows/win64/ts3client.dll", "ts3client_win64.dll" }
+                    : new string[] { "windows/win32/ts3client.dll", "ts3client_win32.dll" };
+                break;
             default: throw new NotImplementedException();
         }
         return true;
