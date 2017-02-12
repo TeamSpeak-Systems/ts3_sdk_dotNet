@@ -81,7 +81,7 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error AcquireCustomPlaybackDataDelegate(UnmanagedPointer deviceName, [Out]short[] buffer, int samples);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error SetLocalTestModeDelegate(ulong serverConnectionHandlerID, int status);
+        delegate Error SetLocalTestModeDelegate(ulong serverConnectionHandlerID, LocalTestMode status);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error StartVoiceRecordingDelegate(ulong serverConnectionHandlerID);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -945,11 +945,11 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public void SetLocalTestMode(Connection connection, bool enabled)
+        public void SetLocalTestMode(Connection connection, LocalTestMode value)
         {
             using (Lock)
             {
-                Check(_SetLocalTestMode(connection.ID, enabled ? 1 : 0));
+                Check(_SetLocalTestMode(connection.ID, value));
             }
         }
 

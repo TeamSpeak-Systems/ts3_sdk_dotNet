@@ -453,11 +453,11 @@ namespace TeamSpeak.Sdk.Client
             set { Library.Api.SetServerConnectionHandlerSpeedLimitDown(this, value); }
         }
 
-        private bool _LocalTestMode = false;
+        private LocalTestMode _LocalTestMode = LocalTestMode.Off;
         /// <summary>
         /// Instead of sending the sound through the network, it can be routed directly through the playback device, so the user will get immediate audible feedback when for example configuring some sound settings.
         /// </summary>
-        public bool LocalTestMode
+        public LocalTestMode LocalTestMode
         {
             get { return _LocalTestMode; }
             set
@@ -487,7 +487,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Adjust the volume of wave files played by <see cref="PlayWaveFile(string, bool)"/>.
         /// The value is a float defining the volume reduction in decibel.
-        /// Reasonable values range from “-40.0” (very silent) to “0.0” (loudest).
+        /// Reasonable values range from ï¿½-40.0ï¿½ (very silent) to ï¿½0.0ï¿½ (loudest).
         /// </summary>
         public float VolumeFactorWave
         {

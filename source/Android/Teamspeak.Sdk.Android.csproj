@@ -140,6 +140,9 @@
     <Compile Include="..\Enums\Frequency.cs">
       <Link>Enums\Frequency.cs</Link>
     </Compile>
+    <Compile Include="..\Enums\LocalTestMode.cs">
+      <Link>Enums\LocalTestMode.cs</Link>
+    </Compile>
     <Compile Include="..\Enums\LogLevel.cs">
       <Link>Enums\LogLevel.cs</Link>
     </Compile>
