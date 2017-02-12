@@ -183,13 +183,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.3.2\android\arm\libts3client_android.so">
-      <Link>libs\armeabi-v7a\libts3client_android.so</Link>
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\arm32\libts3client.so">
+      <Link>libs\armeabi-v7a\libts3client.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.3.2\android\x86\libts3client_android.so">
-      <Link>libs\x86\libts3client_android.so</Link>
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\arm64\libts3client.so">
+      <Link>libs\arm64-v8a\libts3client.so</Link>
+    </EmbeddedNativeLibrary>
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\x86\libts3client.so">
+      <Link>libs\x86\libts3client.so</Link>
+    </EmbeddedNativeLibrary>
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\x86_64\libts3client.so">
+      <Link>libs\x86_64\libts3client.so</Link>
     </EmbeddedNativeLibrary>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
