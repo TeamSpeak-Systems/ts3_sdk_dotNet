@@ -242,17 +242,17 @@ internal static class PlatformSpecific
         switch (platform)
         {
             case SupportedPlatform.MacOSX:
-                names = new string[] { "mac/libts3client.dylib", "libts3client_mac.dylib" };
+                names = new string[] { "mac/libts3client.dylib", "libts3client_mac.dylib", "libts3client.dylib" };
                 break;
             case SupportedPlatform.Linux:
                 names = is64Bit 
-                    ? new string[] { "linux/amd64/libts3client.so", "libts3client_linux_amd64.so" }
-                    : new string[] { "linux/x86/libts3client.so", "libts3client_linux_x86.so" };
+                    ? new string[] { "linux/amd64/libts3client.so", "libts3client_linux_amd64.so", "libts3client.so" }
+                    : new string[] { "linux/x86/libts3client.so", "libts3client_linux_x86.so", "libts3client.so" };
                 break;
             case SupportedPlatform.Windows:
                 names = is64Bit
-                    ? new string[] { "windows/win64/ts3client.dll", "ts3client_win64.dll" }
-                    : new string[] { "windows/win32/ts3client.dll", "ts3client_win32.dll" };
+                    ? new string[] { "windows/win64/ts3client.dll", "ts3client_win64.dll", "ts3client.dll" }
+                    : new string[] { "windows/win32/ts3client.dll", "ts3client_win32.dll", "ts3client.dll" };
                 break;
             default: throw new NotImplementedException();
         }
