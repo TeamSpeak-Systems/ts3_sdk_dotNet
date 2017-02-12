@@ -681,6 +681,31 @@ namespace TeamSpeak.Sdk.Client
                 FailStartOrStop(error, null);
             return taskCompletion.Task;
         }
+        /// <summary>
+        /// Connect to a TeamSpeak 3 server
+        /// </summary>
+        /// <param name="identity">Unique identifier for this server connection. Created with <see cref="Library.CreateIdentity"/></param>
+        /// <param name="ip">Hostname or IP of the TeamSpeak 3 server.</param>
+        /// <param name="port">UDP port of the TeamSpeak 3 server, by default 9987.</param>
+        /// <param name="nickname">On login, the client attempts to take this nickname on the connected server. Note this is not necessarily the actually assigned nickname, as the server can modify the nickname ("gandalf_1" instead the requested "gandalf") or refuse blocked names.</param>
+        /// <param name="defaultChannelID">The <see cref="Channel.ID"/> to a channel on the TeamSpeak 3 server. If the channel exists and the user has sufficient rights and supplies the correct password if required, the channel will be joined on login.</param>
+        /// <param name="defaultChannelPassword">Password for the default channel. Pass null or an empty string if no password is required or no default channel is specified.</param>
+        /// <param name="serverPassword">Password for the server. Pass null or an empty string if the server does not require a password.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <remarks> If you pass a hostname instead of an IP, the Client Lib will try to resolve it to an IP, but the function may block for an unusually long period of time while resolving is taking place. If you are relying on the function to return quickly, we recommend to resolve the hostname yourself (e.g.asynchronously) and then call with the IP instead of the hostname.</remarks>
+        public Task Start(string identity, string ip, uint port, string nickname, ulong defaultChannelID, string defaultChannelPassword = null, string serverPassword = null)
+        {
+            TaskCompletionSource<Error> taskCompletion = new TaskCompletionSource<Error>();
+            if (Interlocked.CompareExchange(ref StartOrStopTaskCompletionSource, taskCompletion, null) != null)
+                throw new InvalidOperationException();
+
+            IsConnecting = true;
+            ChannelTracker.Reset();
+            Error error = Library.Api.TryStartConnection(this, identity, ip, port, nickname, defaultChannelID, defaultChannelPassword, serverPassword);
+            if (error != Error.Ok)
+                FailStartOrStop(error, null);
+            return taskCompletion.Task;
+        }
 
         /// <summary>
         /// Disconnect from a TeamSpeak 3 server

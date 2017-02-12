@@ -121,6 +121,8 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error StartConnectionDelegate(ulong serverConnectionHandlerID, UnmanagedPointer identity, UnmanagedPointer ip, uint port, UnmanagedPointer nickname, UnmanagedPointer defaultChannelArray, UnmanagedPointer defaultChannelPassword, UnmanagedPointer serverPassword);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error StartConnectionWithChannelIDDelegate(ulong serverConnectionHandlerID, UnmanagedPointer identity, UnmanagedPointer ip, uint port, UnmanagedPointer nickname, ulong defaultChannelId, UnmanagedPointer defaultChannelPassword, UnmanagedPointer serverPassword);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error StopConnectionDelegate(ulong serverConnectionHandlerID, UnmanagedPointer quitMessage);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestClientMoveDelegate(ulong serverConnectionHandlerID, ushort clientID, ulong newChannelID, UnmanagedPointer password, UnmanagedPointer returnCode);
@@ -351,6 +353,7 @@ namespace TeamSpeak.Sdk.Client
         readonly SetLogVerbosityDelegate _SetLogVerbosity;
         readonly GetErrorMessageDelegate _GetErrorMessage;
         readonly StartConnectionDelegate _StartConnection;
+        readonly StartConnectionWithChannelIDDelegate _StartConnectionWithChannelID;
         readonly StopConnectionDelegate _StopConnection;
         readonly RequestClientMoveDelegate _RequestClientMove;
         readonly RequestClientVariablesDelegate _RequestClientVariables;
@@ -445,10 +448,12 @@ namespace TeamSpeak.Sdk.Client
         public NativeMethods(SdkHandle handle)
         {
             Handle = handle;
+            handle.GetLibraryMethod("ts3client_getClientLibVersionNumber", out _GetClientLibVersionNumber);
+            LibraryVersion version = GetClientLibVersionNumber();
+
             handle.GetLibraryMethod("ts3client_freeMemory", out _FreeMemory);
             handle.GetLibraryMethod("ts3client_initClientLib", out _InitClientLib);
             handle.GetLibraryMethod("ts3client_getClientLibVersion", out _GetClientLibVersion);
-            handle.GetLibraryMethod("ts3client_getClientLibVersionNumber", out _GetClientLibVersionNumber);
             handle.GetLibraryMethod("ts3client_spawnNewServerConnectionHandler", out _SpawnNewServerConnectionHandler);
             handle.GetLibraryMethod("ts3client_destroyServerConnectionHandler", out _DestroyServerConnectionHandler);
             handle.GetLibraryMethod("ts3client_createIdentity", out _CreateIdentity);
@@ -499,6 +504,8 @@ namespace TeamSpeak.Sdk.Client
             handle.GetLibraryMethod("ts3client_setLogVerbosity", out _SetLogVerbosity);
             handle.GetLibraryMethod("ts3client_getErrorMessage", out _GetErrorMessage);
             handle.GetLibraryMethod("ts3client_startConnection", out _StartConnection);
+            if (version >= LibraryVersion.V_3_0_4)
+                handle.GetLibraryMethod("ts3client_startConnectionWithChannelID", out _StartConnectionWithChannelID);
             handle.GetLibraryMethod("ts3client_stopConnection", out _StopConnection);
             handle.GetLibraryMethod("ts3client_requestClientMove", out _RequestClientMove);
             handle.GetLibraryMethod("ts3client_requestClientVariables", out _RequestClientVariables);
@@ -1147,6 +1154,20 @@ namespace TeamSpeak.Sdk.Client
             using (UnmanagedPointer unmanaged_serverPassword = Native.WriteString(serverPassword ?? string.Empty))
             {
                 return _StartConnection(connection.ID, unmanaged_identity, unmanaged_ip, port, unmanaged_nickname, unmanaged_defaultChannelArray, unmanaged_defaultChannelPassword, unmanaged_serverPassword);
+            }
+        }
+        public Error TryStartConnection(Connection connection, string identity, string ip, uint port, string nickname, ulong defaultChannelID, string defaultChannelPassword, string serverPassword)
+        {
+            using (Lock)
+            using (UnmanagedPointer unmanaged_identity = Native.WriteString(identity))
+            using (UnmanagedPointer unmanaged_ip = Native.WriteString(ip))
+            using (UnmanagedPointer unmanaged_nickname = Native.WriteString(nickname))
+            using (UnmanagedPointer unmanaged_defaultChannelPassword = Native.WriteString(defaultChannelPassword ?? string.Empty))
+            using (UnmanagedPointer unmanaged_serverPassword = Native.WriteString(serverPassword ?? string.Empty))
+            {
+                if (_StartConnectionWithChannelID != null)
+                    return _StartConnectionWithChannelID(connection.ID, unmanaged_identity, unmanaged_ip, port, unmanaged_nickname, defaultChannelID, unmanaged_defaultChannelPassword, unmanaged_serverPassword);
+                else throw new NotSupportedException("StartConnection with defaultChannelID requires v3.0.4");
             }
         }
 
