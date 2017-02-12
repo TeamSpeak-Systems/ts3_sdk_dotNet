@@ -19,7 +19,7 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetClientLibVersionDelegate(out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error GetClientLibVersionNumberDelegate(out ulong result);
+        delegate Error GetClientLibVersionNumberDelegate(out LibraryVersion result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error SpawnNewServerConnectionHandlerDelegate(int port, out ulong result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -663,11 +663,11 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public ulong GetClientLibVersionNumber()
+        public LibraryVersion GetClientLibVersionNumber()
         {
             using (Lock)
             {
-                ulong result;
+                LibraryVersion result;
                 Check(_GetClientLibVersionNumber(out result));
                 return result;
             }

@@ -314,7 +314,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Version number, a part of the complete version string
         /// </summary>
-        public static ulong VersionNumber
+        public static LibraryVersion VersionNumber
         {
             get { return Api.GetClientLibVersionNumber(); }
         }

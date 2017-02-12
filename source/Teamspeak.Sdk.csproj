@@ -64,6 +64,7 @@
     <Compile Include="Client\LibraryParameters.cs" />
     <Compile Include="Client\PlatformSpecific.cs" />
     <Compile Include="Client\SdkHandle.cs" />
+    <Compile Include="Enums\LibraryVersion.cs" />
     <Compile Include="Enums\LocalTestMode.cs" />
     <Compile Include="Enums\SupportedPlatform.cs" />
     <Compile Include="Client\EventHelper.cs" />
