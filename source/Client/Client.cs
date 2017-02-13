@@ -15,7 +15,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// ID of the client
         /// </summary>
-        public ushort ID { get; }
+        public ushort ID { get; internal set; }
         /// <summary>
         /// Server Connection
         /// </summary>
@@ -29,9 +29,10 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public ConnectionInfo ConnectionInfo { get; }
 
-        // cached UniqueIdentifier and Nickname, so that they can survive the clients death
+        // cached UniqueIdentifier, Nickname, Metadata, so that they can survive the clients death
         private string CachedUniqueIdentifier;
         private string CachedNickname;
+        private string CachedMetaData;
 
         /// <summary>
         /// Creates a new Client-Object.
@@ -50,6 +51,7 @@ namespace TeamSpeak.Sdk.Client
             ID = id;
             Connection = connection;
             ConnectionInfo = new ConnectionInfo(this);
+            CachedMetaData = string.Empty;
             RefreshProperties(waitForProperties);
         }
 
@@ -69,7 +71,7 @@ namespace TeamSpeak.Sdk.Client
             set
             {
                 Require.NotNull(nameof(value), value);
-                SetString(ClientProperty.Nickname, value);
+                SetString(ClientProperty.Nickname, value, ref CachedNickname);
             }
         }
         /// <summary>
@@ -159,11 +161,11 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public string MetaData
         {
-            get { return GetString(ClientProperty.MetaData); }
+            get { return GetString(ClientProperty.MetaData, CachedMetaData); }
             set
             {
                 Require.NotNull(nameof(value), value);
-                SetString(ClientProperty.MetaData, value);
+                SetString(ClientProperty.MetaData, value, ref CachedMetaData);
             }
         }
         /// <summary>
@@ -399,31 +401,56 @@ namespace TeamSpeak.Sdk.Client
             Library.Api.GetClientVariableAsUInt64(this, flag);
             FlushClientSelfUpdates();
         }
-        private void SetString(ClientProperty flag, string value)
+        private void SetString(ClientProperty flag, string value, ref string cache)
         {
             if (this != Connection.Self) throw new NotSupportedException();
             Library.Api.SetClientSelfVariableAsString(Connection, flag, value);
             FlushClientSelfUpdates();
+            cache = value;
         }
 
         private void FlushClientSelfUpdates()
         {
-            Task task;
-            Library.Api.FlushClientSelfUpdates(Connection, Connection.GetNextReturnCode(out task));
-            task.Wait();
+            // anything but threadsafe!
+            if (Connection.Status != ConnectStatus.Disconnected)
+            {
+                Task task;
+                Library.Api.FlushClientSelfUpdates(Connection, Connection.GetNextReturnCode(out task));
+                task.Wait();
+            }
+        }
+
+        private void FillCache(ClientProperty flag, bool wait, ref string cache)
+        {
+            string value;
+            if (Library.Api.TryGetClientVariableAsString(this, flag, out value) == Error.Ok)
+            {
+                cache = value;
+                return;
+            }
+            if (wait)
+            {
+                System.Diagnostics.Stopwatch timer = System.Diagnostics.Stopwatch.StartNew();
+                do
+                {
+                    Thread.Yield();
+                    if (Library.Api.TryGetClientVariableAsString(this, flag, out cache) == Error.Ok)
+                    {
+                        cache = value;
+                        return;
+                    }
+                }
+                while (timer.ElapsedMilliseconds < 25);
+                System.Diagnostics.Debug.Assert(false);
+            }
         }
 
         internal void RefreshProperties(bool wait)
         {
             if (ID == 0) return;
-            if (Library.Api.TryGetClientVariableAsString(this, ClientProperty.Nickname, out CachedNickname) != Error.Ok && wait)
-            {
-                System.Diagnostics.Stopwatch timer = System.Diagnostics.Stopwatch.StartNew();
-                do Thread.Yield();
-                while (Library.Api.TryGetClientVariableAsString(this, ClientProperty.Nickname, out CachedNickname) != Error.Ok && timer.ElapsedMilliseconds < 25);
-                System.Diagnostics.Debug.Assert(CachedNickname != null);
-            }
-            Library.Api.TryGetClientVariableAsString(this, ClientProperty.UniqueIdentifier, out CachedUniqueIdentifier);
+            FillCache(ClientProperty.Nickname, wait, ref CachedNickname);
+            FillCache(ClientProperty.UniqueIdentifier, wait, ref CachedUniqueIdentifier);
+            FillCache(ClientProperty.MetaData, wait, ref CachedMetaData);
         }
 
         internal void Hint(string nickname, string uniqueIdentifier)

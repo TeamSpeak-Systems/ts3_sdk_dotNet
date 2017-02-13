@@ -1388,15 +1388,14 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public Error TryGetClientID(Connection connection, out Client result)
+        public Error TryGetClientID(Connection connection, ref Client client)
         {
             using (Lock)
             {
                 ushort unmanaged_result;
                 Error error = _GetClientID(connection.ID, out unmanaged_result);
                 if (error == Error.Ok)
-                    result = connection.Cache.GetClient(unmanaged_result);
-                else result = null;
+                    client = connection.Cache.RebindClient(unmanaged_result, client);
                 return error;
             }
         }

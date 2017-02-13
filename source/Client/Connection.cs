@@ -31,7 +31,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// the connection as a client object
         /// </summary>
-        public Client Self { get; internal set; }
+        public Client Self { get; private set; }
 
         /// <summary>
         /// A list of channels who have the channel as a parent
@@ -381,7 +381,7 @@ namespace TeamSpeak.Sdk.Client
             Preprocessor = new Preprocessor(this);
             ZeroChannel = new Channel(this, 0);
             ZeroClient = new Client(this, 0);
-            Self = ZeroClient;
+            Self = new Client(this, 0);
         }
 
         /// <summary>
@@ -1097,10 +1097,10 @@ namespace TeamSpeak.Sdk.Client
             switch (newStatus)
             {
                 case ConnectStatus.Connected:
-                    Client self;
-                    error = Library.Api.TryGetClientID(this, out self);
-                    Debug.Assert(Error.Ok == error);
-                    Self = self;
+                    Client self = Self;
+                    if (Library.Api.TryGetClientID(this, ref self) == Error.Ok)
+                        Self = self;
+                    else System.Diagnostics.Debug.Assert(false);
                     break;
                 case ConnectStatus.ConnectionEstablished:
                     if (IsConnecting)

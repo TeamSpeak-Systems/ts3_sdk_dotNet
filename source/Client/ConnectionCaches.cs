@@ -50,6 +50,18 @@ namespace TeamSpeak.Sdk.Client
             return GetOrRemoveClient(clientID, Visibility.Retain);
         }
 
+        public Client RebindClient(ushort clientID, Client client)
+        {
+            client.ID = clientID;
+            client = Clients.AddOrUpdate(clientID, client, (id, c) =>
+            {
+                System.Diagnostics.Debug.Assert(client == c);
+                return c;
+            });
+            client.RefreshProperties(wait: false);
+            return client;
+        }
+
         public Client GetOrRemoveClient(ushort clientID, Visibility visibility)
         {
             if (clientID == 0) return null;
