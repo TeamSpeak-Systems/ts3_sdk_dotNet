@@ -353,6 +353,11 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
+        /// <summary>
+        /// Determines how long the client will wait for a reply from the server.
+        /// </summary>
+        public TimeSpan Timeout { get; set; }
+
         private readonly Channel ZeroChannel;
         private readonly Client ZeroClient;
         private readonly AutoResetEvent ZeroChannelGuard = new AutoResetEvent(true);
@@ -382,6 +387,7 @@ namespace TeamSpeak.Sdk.Client
             ZeroChannel = new Channel(this, 0);
             ZeroClient = new Client(this, 0);
             Self = new Client(this, 0);
+            Timeout = TimeSpan.FromSeconds(10);
         }
 
         /// <summary>
@@ -910,7 +916,7 @@ namespace TeamSpeak.Sdk.Client
             if (ZeroChannelGuard.WaitOne(0))
                 mainBody(null, false);
             else
-                ThreadPool.RegisterWaitForSingleObject(ZeroChannelGuard, mainBody, null, Timeout.Infinite, true);
+                ThreadPool.RegisterWaitForSingleObject(ZeroChannelGuard, mainBody, null, System.Threading.Timeout.Infinite, true);
             return taskCompletionSource.Task;
         }
 
@@ -1377,6 +1383,9 @@ namespace TeamSpeak.Sdk.Client
             if (ReturnCodeTasks.TryAdd(returnCode, taskCompletionSource) == false)
                 Debug.Assert(false);
             task = taskCompletionSource.Task;
+            TimeSpan timeout = Timeout;
+            if (timeout > TimeSpan.Zero)
+                Task.Delay(timeout).ContinueWith(_ => SignalTimeout(returnCode));
             return returnCode;
         }
 
@@ -1398,6 +1407,14 @@ namespace TeamSpeak.Sdk.Client
                         break;
                 }
             });
+        }
+
+        internal void SignalTimeout(string returnCode)
+        {
+            TaskCompletionSource<Error> taskCompletionSource;
+            if (ReturnCodeTasks.TryRemove(returnCode, out taskCompletionSource) == false)
+                return;
+            Task.Factory.StartNew(o => ((TaskCompletionSource<Error>)o).SetException(new TimeoutException()), taskCompletionSource);
         }
 
         private void FailAllReturnCodes()
