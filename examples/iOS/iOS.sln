@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iOS", "iOS.csproj", "{B583400A-3AB9-4ED8-BEF9-D09FC74B76BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teamspeak.Sdk.iOS", "..\..\Source\iOS\Teamspeak.Sdk.iOS.csproj", "{E7CF75F5-920B-47C9-BDFA-89E75DD2399E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamSpeak.Sdk.iOS", "..\..\Source\iOS\TeamSpeak.Sdk.iOS.csproj", "{E7CF75F5-920B-47C9-BDFA-89E75DD2399E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

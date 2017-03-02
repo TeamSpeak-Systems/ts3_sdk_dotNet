@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client.csproj", "{1F59FBAE-F605-46AF-9443-130DA2E78C64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teamspeak.Sdk", "..\..\source\Teamspeak.Sdk.csproj", "{4BCC7AF7-7365-4EE0-9793-88F696643F82}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamSpeak.Sdk", "..\..\source\TeamSpeak.Sdk.csproj", "{4BCC7AF7-7365-4EE0-9793-88F696643F82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
