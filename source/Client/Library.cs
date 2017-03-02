@@ -146,6 +146,7 @@ namespace TeamSpeak.Sdk.Client
         public static void Destroy()
         {
             Handle?.Dispose();
+            Handle = null;
         }
 
         /// <summary>
