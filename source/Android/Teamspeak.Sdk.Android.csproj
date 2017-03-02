@@ -183,10 +183,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\arm32\libts3client.so">
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\armeabi-v7a\libts3client.so">
       <Link>libs\armeabi-v7a\libts3client.so</Link>
     </EmbeddedNativeLibrary>
-    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\arm64\libts3client.so">
+    <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\arm64-v8a\libts3client.so">
       <Link>libs\arm64-v8a\libts3client.so</Link>
     </EmbeddedNativeLibrary>
     <EmbeddedNativeLibrary Include="..\..\ts3_sdk_3.0.4\bin\android\x86\libts3client.so">
