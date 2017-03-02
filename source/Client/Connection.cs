@@ -1371,7 +1371,14 @@ namespace TeamSpeak.Sdk.Client
 
         #region ReturnCode
 
-        private ConcurrentDictionary<string, TaskCompletionSource<Error>> ReturnCodeTasks = new ConcurrentDictionary<string, TaskCompletionSource<Error>>();
+        private class ReturnCodeState
+        {
+            public TaskCompletionSource<Error> TaskCompletionSource;
+            public RegisteredWaitHandle RegisteredWaitHandle;
+        }
+
+        private ConcurrentDictionary<string, ReturnCodeState> ReturnCodes = new ConcurrentDictionary<string, ReturnCodeState>();
+        private readonly WaitHandle NeverSet = new ManualResetEvent(false);
         private int ReturnCodeValue = 0;
         private const string ReturnCodePrefix = "_";
 
@@ -1379,49 +1386,49 @@ namespace TeamSpeak.Sdk.Client
         {
             int value = Interlocked.Increment(ref ReturnCodeValue);
             string returnCode = ReturnCodePrefix + value;
-            TaskCompletionSource<Error>  taskCompletionSource = new TaskCompletionSource<Error>();
-            if (ReturnCodeTasks.TryAdd(returnCode, taskCompletionSource) == false)
+            ReturnCodeState state = new ReturnCodeState();
+            state.TaskCompletionSource = new TaskCompletionSource<Error>();
+            if (Timeout > TimeSpan.Zero)
+                state.RegisteredWaitHandle = ThreadPool.RegisterWaitForSingleObject(NeverSet, SignalTimeout, state, Timeout, true);
+            if (ReturnCodes.TryAdd(returnCode, state) == false)
                 Debug.Assert(false);
-            task = taskCompletionSource.Task;
-            TimeSpan timeout = Timeout;
-            if (timeout > TimeSpan.Zero)
-                Task.Delay(timeout).ContinueWith(_ => SignalTimeout(returnCode));
+            task = state.TaskCompletionSource.Task;
             return returnCode;
         }
 
         internal void SetReturnCodeResult(string returnCode, Error error, string extraMessage)
         {
-            TaskCompletionSource<Error> taskCompletionSource;
-            if (ReturnCodeTasks.TryRemove(returnCode, out taskCompletionSource) == false)
+            ReturnCodeState state;
+            if (ReturnCodes.TryRemove(returnCode, out state) == false)
                 return;
+            state?.RegisteredWaitHandle.Unregister(null);
             Task.Factory.StartNew(() =>
             {
                 switch (error)
                 {
                     case Error.Ok:
                     case Error.OkNoUpdate:
-                        taskCompletionSource.SetResult(error);
+                        state.TaskCompletionSource.TrySetResult(error);
                         break;
                     default:
-                        taskCompletionSource.SetException(Library.CreateException(error, extraMessage));
+                        state.TaskCompletionSource.TrySetException(Library.CreateException(error, extraMessage));
                         break;
                 }
             });
         }
 
-        internal void SignalTimeout(string returnCode)
+        internal void SignalTimeout(object state, bool timedOut)
         {
-            TaskCompletionSource<Error> taskCompletionSource;
-            if (ReturnCodeTasks.TryRemove(returnCode, out taskCompletionSource) == false)
-                return;
-            Task.Factory.StartNew(o => ((TaskCompletionSource<Error>)o).SetException(new TimeoutException()), taskCompletionSource);
+            ReturnCodeState returnCodeState = (ReturnCodeState)state;
+            returnCodeState.TaskCompletionSource.TrySetException(new TimeoutException());
+            returnCodeState.RegisteredWaitHandle.Unregister(null);
         }
 
         private void FailAllReturnCodes()
         {
-            foreach (TaskCompletionSource<Error> taskCompletionSource in ReturnCodeTasks.Values)
-                taskCompletionSource.SetException(Library.CreateException(Error.ConnectionLost, null));
-            ReturnCodeTasks.Clear();
+            foreach (ReturnCodeState state in ReturnCodes.Values)
+                state.TaskCompletionSource.TrySetException(Library.CreateException(Error.ConnectionLost, null));
+            ReturnCodes.Clear();
         }
 
         #endregion RecturnCode
