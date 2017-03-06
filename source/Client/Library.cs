@@ -101,8 +101,7 @@ namespace TeamSpeak.Sdk.Client
             InitializedLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
-                if (IsInitialized) throw new InvalidOperationException("Library is already initialized");
-                else if (Handle != null) Handle.WaitForUnloadingFinished();
+                if (Handle != null) throw new InvalidOperationException("Library is already initialized");
                 if (ProcessExitRegistered == false)
                 {
                     AppDomain.CurrentDomain.ProcessExit += ProcessExit;
@@ -134,6 +133,12 @@ namespace TeamSpeak.Sdk.Client
                 nativeMethods.InitClientLib(Events.ClientUIFunctions, FunctionRarePointers, UsedLogTypes, LogFileFolder, ResourcesFolder);
                 NativeMethods = nativeMethods;
             }
+            catch
+            {
+                Handle?.Dispose();
+                Handle = null;
+                throw;
+            }
             finally
             {
                 InitializedLock.ReleaseWriterLock();
@@ -145,8 +150,16 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public static void Destroy()
         {
-            Handle?.Dispose();
-            Handle = null;
+            InitializedLock.AcquireWriterLock(Timeout.Infinite);
+            try
+            {
+                Handle?.Dispose();
+                Handle = null;
+            }
+            finally
+            {
+                InitializedLock.ReleaseWriterLock();
+            }
         }
 
         /// <summary>

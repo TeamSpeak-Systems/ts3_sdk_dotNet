@@ -19,26 +19,18 @@ namespace TeamSpeak.Sdk.Client
 
         public string Location { get; }
         public SupportedPlatform Platform { get; }
-        private volatile int State;
 
         private SdkHandle(IntPtr handle, SupportedPlatform platform, string location)
-
             : base(true)
         {
             SetHandle(handle);
             Platform = platform;
             Location = location;
-            State = 0;
         }
 
         public void GetLibraryMethod<T>(string name, out T t)
         {
             PlatformSpecific.GetLibraryMethod(Platform, handle, name, out t);
-        }
-
-        public void WaitForUnloadingFinished()
-        {
-            while (State != 1) Thread.Yield();
         }
 
         protected override bool ReleaseHandle()
@@ -57,7 +49,6 @@ namespace TeamSpeak.Sdk.Client
             finally
             {
                 PlatformSpecific.UnloadDynamicLibrary(Platform, handle);
-                State = 1;
             }
         }
     }
