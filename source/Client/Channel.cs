@@ -427,11 +427,7 @@ namespace TeamSpeak.Sdk.Client
             else if (cancellationToken != CancellationToken.None)
             {
                 // register cancellationToken
-                cancellationToken.Register(() =>
-                {
-                    Error e = Library.Api.TryHaltTransfer(self, true, null);
-                    System.Diagnostics.Debug.Assert(e == Error.Ok || e == Error.OkNoUpdate);
-                });
+                cancellationToken.Register(() => Library.Api.TryHaltTransfer(self, true, null));
 
             }
 
@@ -449,8 +445,7 @@ namespace TeamSpeak.Sdk.Client
             Require.NotNull(nameof(path), path);
             Task task;
             string returnCode = Connection.GetNextReturnCode(out task);
-            bool success = Connection.Cache.FileListBuilder.Register(returnCode);
-            System.Diagnostics.Debug.Assert(success);
+            Connection.Cache.FileListBuilder.Register(returnCode);
             Library.Api.RequestFileList(this, channelPassword, path, returnCode);
             return Connection.CollectList(task, Connection.Cache.FileListBuilder, returnCode);
         }
@@ -703,7 +698,6 @@ namespace TeamSpeak.Sdk.Client
                 Error error;
                 do Thread.Yield();
                 while ((error = Library.Api.TryGetChannelVariableAsString(this, ChannelProperty.Name, out CachedName)) != Error.Ok && timer.ElapsedMilliseconds < 25);
-                System.Diagnostics.Debug.Assert(error == Error.Ok);
             }
             Library.Api.TryGetChannelVariableAsString(this, ChannelProperty.Topic, out CachedTopic);
         }

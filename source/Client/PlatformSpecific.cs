@@ -113,10 +113,7 @@ internal static class PlatformSpecific
         byte[] bytes = new byte[260];
         int length = NativeWindowsMethods.GetModuleFileName(handle, bytes, bytes.Length);
         if (length <= 0 || length == bytes.Length)
-        {
-            Debug.Assert(false, "failed to get path of library");
             return null;
-        }
         return Encoding.Default.GetString(bytes, 0, length);
     }
 
@@ -125,10 +122,7 @@ internal static class PlatformSpecific
         IntPtr symbol = NativeUnixMehods.dlsym(handle, "ts3client_freeMemory");
         NativeUnixMehods.Dl_info dl_info = new NativeUnixMehods.Dl_info();
         if (symbol == IntPtr.Zero || NativeUnixMehods.dladdr(symbol, ref dl_info) == 0)
-        {
-            Debug.Assert(false, "failed to get path of library");
             return null;
-        }
         return dl_info.dli_fname;
     }
 

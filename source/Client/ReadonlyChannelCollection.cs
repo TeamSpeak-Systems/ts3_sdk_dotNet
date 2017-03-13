@@ -20,7 +20,6 @@ namespace TeamSpeak.Sdk.Client
         public ReadonlyChannelCollection(ICollection<Channel> channels)
         {
             Channels = channels;
-            System.Diagnostics.Debug.Assert(Channels is ICollection);
         }
 
         /// <summary>

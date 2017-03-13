@@ -53,11 +53,7 @@ namespace TeamSpeak.Sdk.Client
         public Client RebindClient(ushort clientID, Client client)
         {
             client.ID = clientID;
-            client = Clients.AddOrUpdate(clientID, client, (id, c) =>
-            {
-                System.Diagnostics.Debug.Assert(client == c);
-                return c;
-            });
+            client = Clients.AddOrUpdate(clientID, client, (id, c) => c);
             client.RefreshProperties(wait: false);
             return client;
         }
@@ -79,7 +75,6 @@ namespace TeamSpeak.Sdk.Client
                     result = Clients.GetOrAdd(clientID, id => new Client(Connection, id, waitForProperties: false));
                     break;
                 default:
-                    System.Diagnostics.Debug.Assert(false);
                     goto case Visibility.Retain;
             }
             return result;
@@ -155,18 +150,14 @@ namespace TeamSpeak.Sdk.Client
         {
             List<T> list;
             bool success = Cache.TryGetValue(code, out list);
-            System.Diagnostics.Debug.Assert(success);
             if (success)
-            {
                 list.Add(t);
-            }
         }
 
         public List<T> Collect(string code)
         {
             List<T> result;
             bool success = Cache.TryRemove(code, out result);
-            System.Diagnostics.Debug.Assert(success);
             return success ? result : new List<T>(0);
         }
     }

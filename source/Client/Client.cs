@@ -441,7 +441,6 @@ namespace TeamSpeak.Sdk.Client
                     }
                 }
                 while (timer.ElapsedMilliseconds < 25);
-                System.Diagnostics.Debug.Assert(false);
             }
         }
 

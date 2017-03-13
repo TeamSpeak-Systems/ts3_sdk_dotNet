@@ -55,7 +55,6 @@ namespace TeamSpeak.Sdk.Client
             {
                 Record tracker = Records.GetOrAdd(channel.ID, new_tracker);
                 if (tracker == new_tracker) break;
-                Debug.Assert(false);
                 ChannelRemoved(channel);
             }
             AddToChannels(parentID, channel, new_tracker.Order);
@@ -76,10 +75,7 @@ namespace TeamSpeak.Sdk.Client
         {
             Record tracker, parentTracker;
             if (Records.TryGetValue(channel.ID, out tracker) == false)
-            {
-                Debug.Assert(false);
                 return;
-            }
             if (tracker.ParentID != InvalidParentID)
             {
                 if (Records.TryGetValue(tracker.ParentID, out parentTracker))
@@ -88,7 +84,6 @@ namespace TeamSpeak.Sdk.Client
                     parentTracker.Channels.Remove(channel);
                     parentTracker.Lock.ExitWriteLock();
                 }
-                else Debug.Assert(false);
             }
             tracker.ParentID = parentID;
             tracker.Order = GetOrder(channel);
@@ -99,10 +94,7 @@ namespace TeamSpeak.Sdk.Client
         {
             Record tracker;
             if (Records.TryGetValue(channel.ID, out tracker) == false)
-            {
-                Debug.Assert(false);
                 return;
-            }
             ulong newOrder = GetOrder(channel);
             if (tracker.Order == newOrder)
             {
@@ -111,10 +103,7 @@ namespace TeamSpeak.Sdk.Client
             tracker.Order = newOrder;
             Record parentTracker;
             if (Records.TryGetValue(tracker.ParentID, out parentTracker) == false)
-            {
-                Debug.Assert(false);
                 return;
-            }
             parentTracker.Lock.EnterWriteLock();
             parentTracker.Channels.Remove(channel);
             AddToChannels(parentTracker, channel, tracker.Order);
@@ -132,10 +121,7 @@ namespace TeamSpeak.Sdk.Client
         {
             Record parentTracker;
             if (Records.TryGetValue(parentID, out parentTracker) == false)
-            {
-                Debug.Assert(false);
                 return;
-            }
             parentTracker.Lock.EnterWriteLock();
             AddToChannels(parentTracker, channel, order);
             parentTracker.Lock.ExitWriteLock();
@@ -156,10 +142,7 @@ namespace TeamSpeak.Sdk.Client
         {
             UInt64 order;
             if (Library.Api.TryGetChannelVariableAsUInt64(channel, ChannelProperty.Order, out order) != Error.Ok)
-            {
-                System.Diagnostics.Debug.Assert(false, "failed to get channel order");
                 order = 0;
-            }
             return order;
         }
     }

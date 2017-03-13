@@ -237,8 +237,7 @@ namespace TeamSpeak.Sdk.Client
         {
             try
             {
-                bool success = api.TryUnregisterCustomDevice(ID);
-                Debug.Assert(success);
+                api.TryUnregisterCustomDevice(ID);
             }
             catch (ObjectDisposedException)
             {

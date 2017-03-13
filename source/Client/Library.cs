@@ -286,8 +286,7 @@ namespace TeamSpeak.Sdk.Client
 
         internal static void AddServer(ulong id, Connection connection)
         {
-            Connection old = ConnectionsCache.AddOrUpdate(id, connection, (_1, _2) => connection);
-            Debug.Assert(object.ReferenceEquals(connection, old));
+            ConnectionsCache.AddOrUpdate(id, connection, (_1, _2) => connection);
         }
         internal static Connection GetServer(ulong id)
         {

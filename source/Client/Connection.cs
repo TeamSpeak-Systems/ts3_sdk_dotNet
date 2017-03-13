@@ -1080,10 +1080,7 @@ namespace TeamSpeak.Sdk.Client
                 {
                     TeamSpeakException exception = antecendent.Exception.InnerException as TeamSpeakException;
                     if (exception == null)
-                    {
-                        System.Diagnostics.Debug.Assert(false);
                         throw antecendent.Exception;
-                    }
                     switch (exception.ErrorCode)
                     {
                         case Error.DatabaseEmptyResult: return (ICollection<T>)new List<T>(0).AsReadOnly();
@@ -1104,7 +1101,6 @@ namespace TeamSpeak.Sdk.Client
                     Client self = Self;
                     if (Library.Api.TryGetClientID(this, ref self) == Error.Ok)
                         Self = self;
-                    else System.Diagnostics.Debug.Assert(false);
                     break;
                 case ConnectStatus.ConnectionEstablished:
                     if (IsConnecting)
@@ -1388,8 +1384,7 @@ namespace TeamSpeak.Sdk.Client
             state.TaskCompletionSource = new TaskCompletionSource<Error>();
             if (Timeout > TimeSpan.Zero)
                 state.RegisteredWaitHandle = ThreadPool.RegisterWaitForSingleObject(NeverSet, SignalTimeout, state, Timeout, true);
-            if (ReturnCodes.TryAdd(returnCode, state) == false)
-                Debug.Assert(false);
+            ReturnCodes.TryAdd(returnCode, state);
             task = state.TaskCompletionSource.Task;
             return returnCode;
         }

@@ -536,7 +536,7 @@ namespace TeamSpeak.Sdk.Client
                     case TargetMode.Server:
                         connection.OnServerMessage(from, managed_message);
                         break;
-                    default: Debug.Assert(false); goto case TargetMode.Server;
+                    default: goto case TargetMode.Server;
                 }
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
