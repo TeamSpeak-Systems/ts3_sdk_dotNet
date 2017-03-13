@@ -28,35 +28,7 @@ internal static class Native
         return Encoding.GetString(bytes);
     }
 
-    public static List<ushort> ReadAndFreeUInt16List(IntPtr pointer)
-    {
-        if (pointer == IntPtr.Zero) return null;
-        List<ushort> result = new List<ushort>();
-        for (int offset = 0; ; offset += sizeof(ushort))
-        {
-            ushort item = (ushort)Marshal.ReadInt16(pointer, offset);
-            if (item == 0) break;
-            result.Add(item);
-        }
-        Library.Api.FreeMemory(pointer);
-        return result;
-    }
-
-    public static List<ulong> ReadAndFreeUInt64List(IntPtr pointer)
-    {
-        if (pointer == IntPtr.Zero) return null;
-        List<ulong> result = new List<ulong>();
-        for (int offset = 0; ; offset += sizeof(ulong))
-        {
-            ulong item = (ulong)Marshal.ReadInt64(pointer, offset);
-            if (item == 0) break;
-            result.Add(item);
-        }
-        Library.Api.FreeMemory(pointer);
-        return result;
-    }
-
-    public static List<T> ReadAndFreeShortIDList<T>(IntPtr pointer, Func<ushort, T> createFunc)
+    public static List<T> ReadShortIDList<T>(IntPtr pointer, Func<ushort, T> createFunc)
     {
         if (pointer == IntPtr.Zero) return null;
         const int sizeOfItem = 2;
@@ -67,10 +39,9 @@ internal static class Native
             if (id == 0) break;
             result.Add(createFunc(id));
         }
-        Library.Api.FreeMemory(pointer);
         return result;
     }
-    public static List<T> ReadAndFreeLongIDList<T>(IntPtr pointer, Func<ulong, T> createFunc)
+    public static List<T> ReadLongIDList<T>(IntPtr pointer, Func<ulong, T> createFunc)
     {
         if (pointer == IntPtr.Zero) return null;
         const int sizeOfItem = 8;
@@ -81,11 +52,10 @@ internal static class Native
             if (id == 0) break;
             result.Add(createFunc(id));
         }
-        Library.Api.FreeMemory(pointer);
         return result;
     }
 
-    public static List<T> ReadAndFreePointerList<T>(IntPtr pointer, Func<IntPtr, T> readAndFreeFunc)
+    public static List<T> ReadPointerList<T>(IntPtr pointer, Func<IntPtr, T> readFunc)
     {
         if (pointer == IntPtr.Zero) return null;
         List<T> result = new List<T>();
@@ -93,32 +63,9 @@ internal static class Native
         {
             IntPtr itemPointer = Marshal.ReadIntPtr(pointer, offset);
             if (itemPointer == IntPtr.Zero) break;
-            result.Add(readAndFreeFunc(itemPointer));
+            result.Add(readFunc(itemPointer));
         }
-        Library.Api.FreeMemory(pointer);
         return result;
-    }
-
-    public static string ReadAndFreeString(IntPtr pointer)
-    {
-        if (pointer == IntPtr.Zero) return null;
-        string result = ReadString(pointer);
-        Library.Api.FreeMemory(pointer);
-        return result;
-    }
-
-    public static Func<IntPtr, SoundDevice> ReadAndFreeSoundDevice(string mode)
-    {
-        return (pointer) =>
-        {
-            IntPtr pName = Marshal.ReadIntPtr(pointer, 0);
-            IntPtr pID = Marshal.ReadIntPtr(pointer, SizeOfPointer);
-            SoundDevice result = new SoundDevice(mode, Native.ReadString(pID), Native.ReadString(pName));
-            Library.Api.FreeMemory(pID);
-            Library.Api.FreeMemory(pName);
-            Library.Api.FreeMemory(pointer);
-            return result;
-        };
     }
 
     public static UnmanagedPointer WriteArray(ushort[] values)

@@ -619,6 +619,47 @@ namespace TeamSpeak.Sdk.Client
             get { return new LockObject(Handle); }
         }
 
+        public List<T> ReadAndFreeShortIDList<T>(IntPtr pointer, Func<ushort, T> createFunc)
+        {
+            List<T> result = Native.ReadShortIDList(pointer, createFunc);
+            FreeMemory(pointer);
+            return result;
+        }
+        public List<T> ReadAndFreeLongIDList<T>(IntPtr pointer, Func<ulong, T> createFunc)
+        {
+            List<T> result = Native.ReadLongIDList(pointer, createFunc);
+            FreeMemory(pointer);
+            return result;
+        }
+
+        public List<T> ReadAndFreePointerList<T>(IntPtr pointer, Func<IntPtr, T> readAndFreeFunc)
+        {
+            List<T> result = Native.ReadPointerList(pointer, readAndFreeFunc);
+            FreeMemory(pointer);
+            return result;
+        }
+
+        public string ReadAndFreeString(IntPtr pointer)
+        {
+            string result = Native.ReadString(pointer);
+            FreeMemory(pointer);
+            return result;
+        }
+
+        public Func<IntPtr, SoundDevice> ReadAndFreeSoundDevice(string mode)
+        {
+            return (pointer) =>
+            {
+                IntPtr pName = Marshal.ReadIntPtr(pointer, 0);
+                IntPtr pID = Marshal.ReadIntPtr(pointer, Native.SizeOfPointer);
+                SoundDevice result = new SoundDevice(mode, Native.ReadString(pID), Native.ReadString(pName));
+                FreeMemory(pID);
+                FreeMemory(pName);
+                FreeMemory(pointer);
+                return result;
+            };
+        }
+
         private void Check(Error error)
         {
             if (error != Error.Ok && error != Error.OkNoUpdate)
@@ -642,9 +683,9 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public bool FreeMemory(IntPtr pointer)
+        private bool FreeMemory(IntPtr pointer)
         {
-            using (Lock) return _FreeMemory(pointer) == Error.Ok;
+            return _FreeMemory(pointer) == Error.Ok;
         }
 
         public void InitClientLib(ClientUIFunctions functionPointer, IntPtr functionRarePointers, LogTypes usedLogTypes, string logFileFolder, string resourcesFolder)
@@ -664,7 +705,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_value = IntPtr.Zero;
                 Error error = _GetClientLibVersion(out unmanaged_value);
-                string result = Native.ReadAndFreeString(unmanaged_value);
+                string result = ReadAndFreeString(unmanaged_value);
                 Check(error);
                 return result;
             }
@@ -706,7 +747,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _CreateIdentity(out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -719,7 +760,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _IdentityStringToUniqueIdentifier(unmanaged_identityString, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -732,7 +773,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanged_result;
                 Error error = _GetPlaybackDeviceList(unmanaged_modeID, out unmanged_result);
-                List<SoundDevice> result = Native.ReadAndFreePointerList(unmanged_result, Native.ReadAndFreeSoundDevice(modeID));
+                List<SoundDevice> result = ReadAndFreePointerList(unmanged_result, ReadAndFreeSoundDevice(modeID));
                 Check(error);
                 return result;
             }
@@ -745,7 +786,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetCaptureDeviceList(unmanaged_modeID, out unmanaged_result);
-                List<SoundDevice> result = Native.ReadAndFreePointerList(unmanaged_result, Native.ReadAndFreeSoundDevice(modeID));
+                List<SoundDevice> result = ReadAndFreePointerList(unmanaged_result, ReadAndFreeSoundDevice(modeID));
                 Check(error);
                 return result;
             }
@@ -757,7 +798,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetPlaybackModeList(out unmanaged_result);
-                List<string> result = Native.ReadAndFreePointerList(unmanaged_result, Native.ReadAndFreeString);
+                List<string> result = ReadAndFreePointerList(unmanaged_result, ReadAndFreeString);
                 Check(error);
                 return result;
             }
@@ -769,7 +810,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetCaptureModeList(out unmanaged_result);
-                List<string> result = Native.ReadAndFreePointerList(unmanaged_result, Native.ReadAndFreeString);
+                List<string> result = ReadAndFreePointerList(unmanaged_result, ReadAndFreeString);
                 Check(error);
                 return result;
 
@@ -815,7 +856,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetCurrentPlayBackMode(connection.ID, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -827,7 +868,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetCurrentCaptureDeviceName(connection.ID, out unmanaged_result, out isDefault);
-                result = Native.ReadAndFreeString(unmanaged_result);
+                result = ReadAndFreeString(unmanaged_result);
                 Check(error);
             }
         }
@@ -838,7 +879,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetCurrentCaptureMode(connection.ID, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1067,7 +1108,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetPreProcessorConfigValue(connection.ID, unmanaged_ident, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1138,7 +1179,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr result;
                 error = _GetErrorMessage((uint)error, out result);
-                message = Native.ReadAndFreeString(result);
+                message = ReadAndFreeString(result);
                 return error;
             }
         }
@@ -1441,7 +1482,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetConnectionVariableAsString(client.Connection.ID, client.ID, (IntPtr)flag, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1514,7 +1555,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetClientVariableAsString(client.Connection.ID, client.ID, (IntPtr)flag, out unmanaged_result);
-                result = Native.ReadAndFreeString(unmanaged_result);
+                result = ReadAndFreeString(unmanaged_result);
                 return error;
             }
         }
@@ -1525,7 +1566,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetClientList(connection.ID, out unmanaged_result);
-                List<Client> result = Native.ReadAndFreeShortIDList(unmanaged_result, connection.Cache.GetClient);
+                List<Client> result = ReadAndFreeShortIDList(unmanaged_result, connection.Cache.GetClient);
                 Check(error);
                 return result;
             }
@@ -1583,7 +1624,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetChannelVariableAsString(channel.Connection.ID, channel.ID, (IntPtr)flag, out unmanaged_result);
-                result = Native.ReadAndFreeString(unmanaged_result);
+                result = ReadAndFreeString(unmanaged_result);
                 return error;
             }
         }
@@ -1641,7 +1682,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetChannelList(connection.ID, out unmanaged_result);
-                List<Channel> result = Native.ReadAndFreeLongIDList(unmanaged_result, connection.Cache.GetChannel);
+                List<Channel> result = ReadAndFreeLongIDList(unmanaged_result, connection.Cache.GetChannel);
                 Check(error);
                 return result;
             }
@@ -1653,7 +1694,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetChannelClientList(channel.Connection.ID, channel.ID, out unmanaged_result);
-                List<Client> result = Native.ReadAndFreeShortIDList(unmanaged_result, channel.Connection.Cache.GetClient);
+                List<Client> result = ReadAndFreeShortIDList(unmanaged_result, channel.Connection.Cache.GetClient);
                 Check(error);
                 return result;
             }
@@ -1692,7 +1733,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetServerConnectionHandlerList(out unmanaged_result);
-                List<Connection> result = Native.ReadAndFreeLongIDList(unmanaged_result, Library.GetServer);
+                List<Connection> result = ReadAndFreeLongIDList(unmanaged_result, Library.GetServer);
                 Check(error);
                 return result;
             }
@@ -1724,7 +1765,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetServerVariableAsString(connection.ID, (IntPtr)flag, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1744,7 +1785,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetTransferFileName(transfer.ID, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1756,7 +1797,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetTransferFilePath(transfer.ID, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }
@@ -1768,7 +1809,7 @@ namespace TeamSpeak.Sdk.Client
             {
                 IntPtr unmanaged_result;
                 Error error = _GetTransferFileRemotePath(transfer.ID, out unmanaged_result);
-                string result = Native.ReadAndFreeString(unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
                 Check(error);
                 return result;
             }

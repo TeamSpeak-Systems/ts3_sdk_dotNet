@@ -9,8 +9,11 @@ namespace TeamSpeak.Sdk.Client
 {
     internal class SdkHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        private static AutoResetEvent DllUnloaded = new AutoResetEvent(true);
+
         public static SdkHandle Load(SupportedPlatform platform, string[] possibleNames)
         {
+            DllUnloaded.WaitOne();
             IntPtr handle;
             string location;
             PlatformSpecific.LoadDynamicLibrary(platform, possibleNames, out handle, out location);
@@ -35,21 +38,31 @@ namespace TeamSpeak.Sdk.Client
 
         protected override bool ReleaseHandle()
         {
+            bool result = true;
             try
             {
                 NativeMethods.DestroyClientLibDelegate destroyClientLib;
                 GetLibraryMethod("ts3client_destroyClientLib", out destroyClientLib);
                 destroyClientLib();
-                return true;
             }
             catch
             {
-                return false;
+                result = false;
             }
-            finally
+            try
             {
                 PlatformSpecific.UnloadDynamicLibrary(Platform, handle);
             }
+            catch
+            {
+                result = false;
+            }
+            try
+            {
+                DllUnloaded.Set();
+            }
+            catch (ObjectDisposedException)  { /* nop */ }
+            return result;
         }
     }
 }
