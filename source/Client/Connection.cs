@@ -359,7 +359,6 @@ namespace TeamSpeak.Sdk.Client
         public TimeSpan Timeout { get; set; }
 
         private readonly Channel ZeroChannel;
-        private readonly Client ZeroClient;
         private readonly AutoResetEvent ZeroChannelGuard = new AutoResetEvent(true);
         internal readonly ConnectionCaches Cache;
         internal readonly ChannelTracker ChannelTracker;
@@ -385,7 +384,6 @@ namespace TeamSpeak.Sdk.Client
             ChannelTracker = new ChannelTracker();
             Preprocessor = new Preprocessor(this);
             ZeroChannel = new Channel(this, 0);
-            ZeroClient = new Client(this, 0);
             Self = new Client(this, 0);
             Timeout = TimeSpan.FromSeconds(10);
         }
