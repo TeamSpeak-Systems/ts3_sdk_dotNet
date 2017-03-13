@@ -40,32 +40,32 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// The library can output log messages (called by <see cref="Library.Log(LogLevel, string, Connection, string)"/>) to a file (located in the logs directory relative to the client executable), to stdout or to user defined callbacks.
         /// </summary>
-        public LogTypes UsedLogTypes { get; set; } = LogTypes.None;
+        public LogTypes UsedLogTypes { get; set; }
 
         /// <summary>
         /// Defines the location where the logs are written to. Pass null for the default behavior, which is to use a folder called logs in the current working directory.
         /// </summary>
-        public string LogFileFolder { get; set; } = null;
+        public string LogFileFolder { get; set; }
 
         /// <summary>
         /// Used to hash the password in the same way it is hashed in the outside data store. Or just return the password to send the clear text to the server.
         /// </summary>
-        public ClientPasswordEncryptHandler ClientPasswordEncrypt { get; set; } = null;
+        public ClientPasswordEncryptHandler ClientPasswordEncrypt { get; set; }
 
         /// <summary>
         /// Encrypts outgoing data
         /// </summary>
-        public CustomPacketEncryptHandler CustomPacketEncrypt { get; set; } = null;
+        public CustomPacketEncryptHandler CustomPacketEncrypt { get; set; }
 
         /// <summary>
         /// Decrypts incoming data
         /// </summary>
-        public CustomPacketDecryptHandler CustomPacketDecrypt { get; set; } = null;
+        public CustomPacketDecryptHandler CustomPacketDecrypt { get; set; }
 
         /// <summary>
         /// Unused by SDK
         /// </summary>
-        public IntPtr FunctionRarePointers { get; set; } = IntPtr.Zero;
+        public IntPtr FunctionRarePointers { get; set; }
 
 
         /// <summary>
