@@ -1887,12 +1887,6 @@ namespace TeamSpeak.Sdk.Client
 
         public FileTransfer SendFile(Channel channel, string channelPW, string file, bool overwrite, bool resume, string sourceDirectory, string returnCode)
         {
-            FileTransfer result;
-            Check(TrySendFile(channel, channelPW, file, overwrite, resume, sourceDirectory, returnCode, out result));
-            return result;
-        }
-        public Error TrySendFile(Channel channel, string channelPW, string file, bool overwrite, bool resume, string sourceDirectory, string returnCode, out FileTransfer result)
-        {
             using (Lock)
             using (UnmanagedPointer unmanaged_channelPW = Native.WriteString(channelPW ?? string.Empty))
             using (UnmanagedPointer unmanaged_file = Native.WriteString(file))
@@ -1901,19 +1895,12 @@ namespace TeamSpeak.Sdk.Client
             {
                 ushort id;
                 Error error = _SendFile(channel.Connection.ID, channel.ID, unmanaged_channelPW, unmanaged_file, overwrite ? 1 : 0, resume ? 1 : 0, unmanaged_sourceDirectory, out id, unmanaged_returnCode);
-                CheckNoThrow(error, channel.Connection, returnCode);
-                result = error == Error.Ok ? channel.Connection.Cache.GetTransfer(id) : null;
-                return error;
+                Check(error, channel.Connection, returnCode);
+                return channel.Connection.Cache.GetTransfer(id);
             }
         }
 
         public FileTransfer RequestFile(Channel channel, string channelPW, string file, bool overwrite, bool resume, string destinationDirectory, string returnCode)
-        {
-            FileTransfer result;
-            Check(TryRequestFile(channel, channelPW, file, overwrite, resume, destinationDirectory, returnCode, out result));
-            return result;
-        }
-        public Error TryRequestFile(Channel channel, string channelPW, string file, bool overwrite, bool resume, string destinationDirectory, string returnCode, out FileTransfer result)
         {
             using (Lock)
             using (UnmanagedPointer unmanaged_channelPW = Native.WriteString(channelPW ?? string.Empty))
@@ -1923,9 +1910,8 @@ namespace TeamSpeak.Sdk.Client
             {
                 ushort id;
                 Error error = _RequestFile(channel.Connection.ID, channel.ID, unmanaged_channelPW, unmanaged_file, overwrite ? 1 : 0, resume ? 1 : 0, unmanaged_destinationDirectory, out id, unmanaged_returnCode);
-                CheckNoThrow(error, channel.Connection, returnCode);
-                result = error == Error.Ok ? channel.Connection.Cache.GetTransfer(id) : null;
-                return error;
+                Check(error, channel.Connection, returnCode);
+                return channel.Connection.Cache.GetTransfer(id);
             }
         }
 

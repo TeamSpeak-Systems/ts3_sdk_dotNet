@@ -300,7 +300,7 @@ namespace TeamSpeak.Sdk.Client
         {
             Require.NotNull(nameof(sourceDirectory), sourceDirectory);
             Require.NotNull(nameof(fileName), fileName);
-            return SimplifiedTransferRequest(Library.Api.TrySendFile, fileName, sourceDirectory, channelPassword, overwrite, resume, cancellationToken);
+            return SimplifiedTransferRequest(Library.Api.SendFile, fileName, sourceDirectory, channelPassword, overwrite, resume, cancellationToken);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace TeamSpeak.Sdk.Client
         {
             Require.NotNull(nameof(fileName), fileName);
             Require.NotNull(nameof(destinationDirectory), destinationDirectory);
-            return SimplifiedTransferRequest(Library.Api.TryRequestFile, fileName, destinationDirectory, channelPassword, overwrite, resume, cancellationToken);
+            return SimplifiedTransferRequest(Library.Api.RequestFile, fileName, destinationDirectory, channelPassword, overwrite, resume, cancellationToken);
         }
         
         /// <summary>
@@ -371,7 +371,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Implementation for both upload and download. Since both APIs need a thick wrapper, and are nearly identically => the code was merged.
         /// </summary>
-        private delegate Error TransferMethod(Channel channel, string channelPW, string file, bool overwrite, bool resume, string directory, string returnCode, out FileTransfer result);
+        private delegate FileTransfer TransferMethod(Channel channel, string channelPW, string file, bool overwrite, bool resume, string directory, string returnCode);
         private Task SimplifiedTransferRequest(TransferMethod method, string fileName, string directory, string channelPassword, bool overwrite, bool resume, CancellationToken cancellationToken)
         {
             TaskCompletionSource<Error> taskCompletionSource = new TaskCompletionSource<Error>();
@@ -393,16 +393,13 @@ namespace TeamSpeak.Sdk.Client
             FileTransfer self = null;
             Task startTask;
             string returnCode = Connection.GetNextReturnCode(out startTask);
-            RegisteredWaitHandle waitHandle = null;
             // = null, to make the c# compiler happy.
             FileTransferStatusEventHandler eventHandler = null;
             eventHandler = (transfer, status) =>
             {
                 if (transfer != self) return;
                 // any event for transfer signals the end of the operation
-                // so lets clean up
                 Connection.FileTransferStatusReceived -= eventHandler;
-                waitHandle?.Unregister(null);
                 // translate the error code into task state
                 switch (status)
                 {
@@ -411,24 +408,21 @@ namespace TeamSpeak.Sdk.Client
                     default: taskCompletionSource.SetException(Library.CreateException(status)); break;
                 }
             };
-            Connection.FileTransferStatusReceived += eventHandler;
             startTask.ContinueWith(antecendent =>
             {
-                eventHandler(self, (antecendent.Exception?.InnerException as TeamSpeakException)?.ErrorCode ?? Error.Undefined);
+                // failed to initiate a transfer
+                Connection.FileTransferStatusReceived -= eventHandler;
+                // pass exception to user
+                taskCompletionSource.SetException(antecendent.Exception);
             }, cancellationToken, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
+            Connection.FileTransferStatusReceived += eventHandler;
 
-            Error error = method(this, channelPassword, fileName, overwrite, resume, directory, returnCode, out self);
-            if (error != Error.Ok)
-            {
-                // operation never got of the ground, short circuit out.
-                // not necessary, since library calls FileTransferStatusReceived 
-                // eventHandler(self, error);
-            }
-            else if (cancellationToken != CancellationToken.None)
+            self = method(this, channelPassword, fileName, overwrite, resume, directory, returnCode);
+
+            if (cancellationToken != CancellationToken.None)
             {
                 // register cancellationToken
                 cancellationToken.Register(() => Library.Api.TryHaltTransfer(self, true, null));
-
             }
 
             return taskCompletionSource.Task;
