@@ -1029,7 +1029,6 @@ namespace TeamSpeak.Sdk.Client
         /// </remarks>
         /// <param name="targetChannelArray">array of channels to whisper to, set to null to disable</param>
         /// <param name="targetClientArray">array of clients to whisper to, set to null to disable</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
         public void SetWhisperList(Channel[] targetChannelArray, Client[] targetClientArray)
         {
             Require.EntriesNotNull(nameof(targetChannelArray), targetChannelArray);
