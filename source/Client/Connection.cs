@@ -1022,6 +1022,24 @@ namespace TeamSpeak.Sdk.Client
         }
 
         /// <summary>
+        /// With a whisper list set a client can talk to the specified clients and channels bypassing the standard rule that voice is only transmitted to the current channel. Whisper lists can be defined for individual clients.
+        /// </summary>
+        /// <remarks>
+        /// To control which client is allowed to whisper to own client, the Library implements an internal whisper whitelist mechanism. When a client receives a whisper while the whispering client has not yet been added to the whisper allow list, the receiving client gets the <see cref="Connection.WhisperIgnored"/>-Event. Note that whisper voice data is not received until the sending client is added to the receivers whisper allow list.
+        /// </remarks>
+        /// <param name="targetChannelArray">array of channels to whisper to, set to null to disable</param>
+        /// <param name="targetClientArray">array of clients to whisper to, set to null to disable</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public void SetWhisperList(Channel[] targetChannelArray, Client[] targetClientArray)
+        {
+            Require.EntriesNotNull(nameof(targetChannelArray), targetChannelArray);
+            Require.SameConnection(nameof(targetChannelArray), this, targetChannelArray);
+            Require.EntriesNotNull(nameof(targetClientArray), targetClientArray);
+            Require.SameConnection(nameof(targetClientArray), this, targetClientArray);
+            Library.Api.RequestClientSetWhisperList(Self, targetChannelArray, targetClientArray, null);
+        }
+
+        /// <summary>
         /// Returns every client with a matching UniqueId
         /// </summary>
         /// <param name="uniqueIdentifier">UniqueId to look for</param>
