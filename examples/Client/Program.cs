@@ -335,11 +335,6 @@ namespace TeamSpeak.Sdk.Client.Example
             }
         }
 
-        public static Client AskForWhisperClient()
-        {
-            return SelectClient("Select the client whose whisper list should be modified (0 for self):") ?? Connection.Self;
-        }
-
         static Channel SelectChannel()
         {
             foreach (Channel channel in Connection.AllChannels)
@@ -576,25 +571,19 @@ namespace TeamSpeak.Sdk.Client.Example
 
         private static void SetWhisperList()
         {
-            Client client = AskForWhisperClient() ?? Connection.Self;
-            Console.WriteLine();
             Console.Write("Enter target channel ID: ");
             ulong channelID;
             if (ulong.TryParse(Console.ReadLine(), out channelID) == false)
                 channelID = 0;
             Channel channel = new Channel(Connection, channelID);
-            client.SetWhisperList(new Channel[] { channel }, null);
-            Console.WriteLine($"Whisper list requested for client {client.Nickname} in channel {channel.Name}");
+            Connection.SetWhisperList(new Channel[] { channel }, null);
+            Console.WriteLine($"Whisper list requested for channel {channel.Name}.");
         }
 
         private static void ClearWhisperList()
         {
-            Client client = AskForWhisperClient() ?? Connection.Self;
-            if (client != null)
-            {
-                client.SetWhisperList((Channel[])null, (Client[])null);
-                Console.WriteLine($"Whisper list cleared for client {client.Nickname}");
-            }
+            Connection.SetWhisperList((Channel[])null, (Client[])null);
+            Console.WriteLine("Whisper list cleared.");
         }
 
         private static void ConfigureMicrophone()
