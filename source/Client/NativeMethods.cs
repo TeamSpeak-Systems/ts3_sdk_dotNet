@@ -964,9 +964,10 @@ namespace TeamSpeak.Sdk.Client
                 Error error = _UnregisterCustomDevice(unmanaged_deviceID);
                 switch (error)
                 {
-                    case Error.Ok: return true;
-                    case Error.SoundUnknownDevice: return false;
-                    default: throw Library.CreateException(error);
+                    case Error.Ok: return true;                 // regular case
+                    case Error.SoundUnknownDevice: return true; // should not happen, but accept it anyway
+                    case Error.SoundDeviceInUse: return false;  // the device is still in use, reason is most likely that the GC disposes out of order
+                    default: return false;                      // something unexpected happened -> ignore it.
                 }
             }
         }
