@@ -560,17 +560,13 @@ namespace TeamSpeak.Sdk.Client
             Task task;
             string returnCode = GetNextReturnCode(out task);
             PlaybackShutdownCompleteEventHandler eventHandler = null;
-            eventHandler = _ => { lock (eventHandler) SetReturnCodeResult(returnCode, Error.Ok, null); PlaybackShutdownCompleted -= eventHandler; };
+            eventHandler = _ => { PlaybackShutdownCompleted -= eventHandler; SetReturnCodeResult(returnCode, Error.Ok, null); };
             PlaybackShutdownCompleted += eventHandler;
             Error error = Library.Api.TryInitiateGracefulPlaybackShutdown(this);
             if (error != Error.Ok)
             {
                 PlaybackShutdownCompleted -= eventHandler;
-                if (error != Error.Ok)
-                {
-                    error = error == Error.OkNoUpdate ? Error.Ok : error;
-                    SetReturnCodeResult(returnCode, error, null);
-                }
+                SetReturnCodeResult(returnCode, error == Error.OkNoUpdate ? Error.Ok : error, null);
             }
             return task;
         }
