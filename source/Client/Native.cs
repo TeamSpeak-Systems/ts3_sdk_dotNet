@@ -22,7 +22,7 @@ internal static class Native
     {
         if (pointer == IntPtr.Zero) return null;
         int length = 0;
-        while (Marshal.ReadByte(pointer, length) != 0) length += 1; ;
+        while (Marshal.ReadByte(pointer, length) != 0) length += 1;
         byte[] bytes = new byte[length];
         Marshal.Copy(pointer, bytes, 0, length);
         return Encoding.GetString(bytes);

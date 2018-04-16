@@ -520,7 +520,7 @@ namespace TeamSpeak.Sdk.Client
                 IEnumerable<ISoundDevice> soundDeviceSource = mode != CustomDevice.ModeName
                                                             ? Library.GetPlaybackDevices(mode).Cast<ISoundDevice>()
                                                             : Library.CustomDevices;
-                PlaybackDevice = soundDeviceSource.FirstOrDefault(d => d.ID == id) ?? new SoundDevice(mode, id, null); ;
+                PlaybackDevice = soundDeviceSource.FirstOrDefault(d => d.ID == id) ?? new SoundDevice(mode, id, null);
             }
         }
 
