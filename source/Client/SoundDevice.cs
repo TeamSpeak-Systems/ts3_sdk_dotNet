@@ -226,7 +226,14 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         ~CustomDevice()
         {
-            Dispose(false);
+            try
+            {
+                Dispose(false);
+            }
+            catch (Exception)
+            {
+                // Don't allow exceptions to escape the finalizer, which would crash the process.
+            }
         }
 
         /// <summary>
