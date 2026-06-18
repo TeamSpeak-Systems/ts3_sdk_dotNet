@@ -163,7 +163,7 @@ namespace TeamSpeak.Sdk.Client
     /// </summary>
     /// <param name="client">the <see cref="Client"/> whose talk status changed</param>
     /// <param name="status">the new <see cref="TalkStatus"/></param>
-    /// <param name="isReceivedWhisper">true if the event was caused by private whispering; otherwise false</param>
+    /// <param name="isReceivedWhisper"><see langword="true"/> if the event was caused by private whispering; otherwise <see langword="false"/></param>
     public delegate void TalkStatusChangeEventHandler(Client client, TalkStatus status, bool isReceivedWhisper);
 
     /// <summary>
@@ -218,7 +218,7 @@ namespace TeamSpeak.Sdk.Client
     /// Called when the list of <see cref="SoundDevice"/> returned by <see cref="Library.GetCaptureDevices(string)"/> and <see cref="Library.GetPlaybackDevices(string)"/> was changed
     /// </summary>
     /// <param name="mode">The soundbackend affected</param>
-    /// <param name="playOrCap">true if the list of playback devices is changed; otherwise the list of capture devices is changed</param>
+    /// <param name="playOrCap"><see langword="true"/> if the list of playback devices is changed; otherwise the list of capture devices is changed</param>
     public delegate void SoundDeviceListChangedEventHandler(string mode, bool playOrCap);
 
     /// <summary>
@@ -226,8 +226,9 @@ namespace TeamSpeak.Sdk.Client
     /// </summary>
     /// <param name="client">the <see cref="Client"/> whose sound data is about to be played</param>
     /// <param name="samples">a <see cref="Array"/> containing the sound date</param>
+    /// <param name="frameCount">sampleCount = frameCount * channels</param>
     /// <param name="channels">the number of channels in the sound data</param>
-    public delegate void EditPlaybackVoiceDataEventHandler(Client client, short[] samples, int channels);
+    public delegate void EditPlaybackVoiceDataEventHandler(Client client, IntPtr samples, int frameCount, int channels);
 
     /// <summary>
     /// Used when a incoming voice packet from a remote <see cref="Client"/> was decoded and 3D positioned.
@@ -249,14 +250,28 @@ namespace TeamSpeak.Sdk.Client
     /// <param name="channelFillMask">a bit-mask of <see cref="Speakers"/> that defines which channels are filled. For efficiency reasons, not all channels need to have actual sound data in it. So before this data is used, use this bit-mask to check if the channel is actually filled. If you decide to add data to a channel that is empty, set the bit for this channel in this mask.</param>
     public delegate void EditMixedPlaybackVoiceDataEventHandler(Connection connection, short[] samples, int channels, Speakers[] channelSpeakers, ref Speakers channelFillMask);
 
+    #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+    /// <summary>
+    /// Called after audio data was aquired from the capture device, without any pre processing applied. Allows access to raw audio data.
+    /// </summary>
+    /// <param name="connection">the <see cref="Connection"/></param>
+    /// <param name="samples">a <see cref="Array"/> containing the sound date</param>
+    /// <param name="sampleCount">The number of frames (samples per channel) in the samples buffer</param>
+    /// <param name="channels">Channels how many audio channels are available in the buffer</param>
+    /// <param name="flags">allows to mute the audio stream, set LSB to 1 to mute the audio.</param>
+    public delegate void EditCapturedVoiceDataPreprocessEventHandler(Connection connection, IntPtr samples, int sampleCount, int channels, ref int flags);
+#endif
+    #endregion
+
     /// <summary>
     /// Used after sound is recorded from the sound device and is preprocessed. 
     /// </summary>
     /// <param name="connection">the <see cref="Connection"/></param>
     /// <param name="samples">a <see cref="Array"/> containing the sound date</param>
     /// <param name="channels">the number of channels in the sound data</param>
-    /// <param name="edited">true if the sound data was changed by the event-handler; otherwise false</param>
-    /// <param name="cancel">true if the sound data should be discarded; otherwise false</param>
+    /// <param name="edited"><see langword="true"/> if the sound data was changed by the event-handler; otherwise <see langword="false"/></param>
+    /// <param name="cancel"><see langword="true"/> if the sound data should be discarded; otherwise <see langword="false"/></param>
     public delegate void EditCapturedVoiceDataEventHandler(Connection connection, short[] samples, int channels, ref bool edited, ref bool cancel);
 
     /// <summary>
@@ -305,7 +320,7 @@ namespace TeamSpeak.Sdk.Client
     /// </summary>
     /// <param name="connection">the <see cref="Connection"/></param>
     /// <param name="serverUniqueIdentifier">UniqueIdentifier of the server</param>
-    /// <param name="cancelConnect">true if the connection process should be aborted; otherwise false</param>
+    /// <param name="cancelConnect"><see langword="true"/> if the connection process should be aborted; otherwise <see langword="false"/></param>
     public delegate void CheckServerUniqueIdentifierEventHandler(Connection connection, string serverUniqueIdentifier, ref bool cancelConnect);
 
     /// <summary>
@@ -328,5 +343,4 @@ namespace TeamSpeak.Sdk.Client
     /// Used to return the reply of the server for <see cref="Channel.GetFileInfo(string, string)"/>
     /// </summary>
     public delegate void FileInfoEventHandler(Channel channel, string name, ulong size, DateTimeOffset lastModified);
-
 }

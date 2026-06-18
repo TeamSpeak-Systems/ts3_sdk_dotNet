@@ -7,18 +7,22 @@
     {
         /// <summary>
         /// mono,   16bit,  8kHz, bitrate dependent on the quality setting
+        /// deprecated
         /// </summary>
         SpeexNarrowband = 0,
         /// <summary>
         /// mono,   16bit, 16kHz, bitrate dependent on the quality setting
+        /// deprecated
         /// </summary>
         SpeexWideband,
         /// <summary>
         /// mono,   16bit, 32kHz, bitrate dependent on the quality setting
+        /// deprecated
         /// </summary>
         SpeexUltrawideband,
         /// <summary>
         /// mono,   16bit, 48kHz, bitrate dependent on the quality setting
+        /// deprecated
         /// </summary>
         CeltMono,
         /// <summary>

@@ -429,7 +429,7 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="client">The <see cref="Client"/> for which the <see cref="ConnectionInfo"/> is requested</param>
         public ConnectionInfo(Client client)
         {
-            Require.NotNull(nameof(client), client);
+            Sdk.Require.NotNull(nameof(client), client);
             Client = client;
         }
 

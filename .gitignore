@@ -24,8 +24,6 @@ bld/
 
 # Visual Studio 2015 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -266,3 +264,9 @@ __pycache__/
 
 # Cake - Uncomment if you are using it
 # tools/
+
+/ts3_sdk_*
+/ts_sdk
+
+# Native SDK deployed by tools/Bootstrap (downloaded, not tracked)
+/external/

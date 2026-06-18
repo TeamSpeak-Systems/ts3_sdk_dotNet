@@ -16,10 +16,13 @@ namespace TeamSpeak.Sdk.Client
     /// </summary>
     public static class Library
     {
-
         private static SdkHandle Handle;
         private static NativeMethods NativeMethods;
+#if UNITY_ANDROID && !UNITY_EDITOR
+        internal static NativeEvents Events;
+#else
         private static NativeEvents Events;
+#endif
         private static ReaderWriterLock InitializedLock = new ReaderWriterLock();
         private static ConcurrentDictionary<ulong, Connection> ConnectionsCache;
         private static List<CustomDevice> CustomDevicesCache;
@@ -57,7 +60,7 @@ namespace TeamSpeak.Sdk.Client
         }
 
         /// <summary>
-        /// true if the TeamSpeak library has been loaded and initialized; otherwise, false
+        /// <see langword="true"/> if the TeamSpeak library has been loaded and initialized; otherwise, <see langword="false"/>
         /// </summary>
         public static bool IsInitialized
         {
@@ -93,10 +96,10 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="parameters">Information used to create the instance</param>
         /// <exception cref="InvalidOperationException">a <see cref="Library"/> is already created</exception>
-        /// <exception cref="NullReferenceException"><paramref name="parameters"/> is null</exception>
+        /// <exception cref="NullReferenceException"><paramref name="parameters"/> is <see langword="null"/></exception>
         public static void Initialize(LibraryParameters parameters)
         {
-            Require.NotNull(nameof(parameters), parameters);
+            Sdk.Require.NotNull(nameof(parameters), parameters);
 
             InitializedLock.AcquireWriterLock(Timeout.Infinite);
             try
@@ -108,7 +111,7 @@ namespace TeamSpeak.Sdk.Client
                     ProcessExitRegistered = true;
                 }
                 Platform = parameters.Platform;
-                Handle = SdkHandle.Load(Platform, parameters.PossibleNativeBinaryLocations);
+                Handle = SdkHandle.LoadClientLibrary(Platform, parameters.PossibleNativeBinaryLocations);
                 NativeBinary = Handle.Location;
                 FunctionRarePointers = parameters.FunctionRarePointers;
                 UsedLogTypes = parameters.UsedLogTypes;
@@ -124,13 +127,15 @@ namespace TeamSpeak.Sdk.Client
                 ConnectionsCache = new ConcurrentDictionary<ulong, Connection>();
                 CustomDevicesCache = new List<CustomDevice>();
 
-				if (ResourcesFolder == null)
-					ResourcesFolder = string.Empty;
-				else if (ResourcesFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString(), StringComparison.InvariantCulture) == false)
+                if (ResourcesFolder == null)
+                    ResourcesFolder = string.Empty;
+                else if (ResourcesFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString(), StringComparison.InvariantCulture) == false)
                     ResourcesFolder += System.IO.Path.DirectorySeparatorChar;
 
                 NativeMethods nativeMethods = new NativeMethods(Handle);
+#if UNITY_EDITOR || !UNITY_ANDROID
                 nativeMethods.InitClientLib(Events.ClientUIFunctions, FunctionRarePointers, UsedLogTypes, LogFileFolder, ResourcesFolder);
+#endif
                 NativeMethods = nativeMethods;
             }
             catch
@@ -184,7 +189,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public static LogTypes UsedLogTypes { get; private set; }
         /// <summary>
-        /// Defines the location where the logs are written to. Pass null for the default behavior, which is to use a folder called logs in the current working directory.
+        /// Defines the location where the logs are written to. Pass <see langword="null"/> for the default behavior, which is to use a folder called logs in the current working directory.
         /// </summary>
         public static string LogFileFolder { get; private set; }
         /// <summary>
@@ -196,6 +201,7 @@ namespace TeamSpeak.Sdk.Client
         /// Called when the list of sound devices returned by <see cref="GetCaptureDevices(string)"/> and <see cref="GetPlaybackDevices(string)"/> was changed
         /// </summary>
         public static event SoundDeviceListChangedEventHandler SoundDeviceListChanged;
+
         /// <summary>
         /// If user-defined logging was enabled when initializing the Client Lib by setting <see cref="LogTypes.Userlogging"/> in <see cref="LibraryParameters.UsedLogTypes"/>, log messages will be sent to the callback, which allows user customizable logging and handling
         /// </summary>
@@ -249,7 +255,7 @@ namespace TeamSpeak.Sdk.Client
         /// <seealso cref="GetCaptureDevices(string)"/>
         public static ICollection<SoundDevice> GetPlaybackDevices(string mode)
         {
-            Require.NotNullOrEmpty(nameof(mode), mode);
+            Sdk.Require.NotNullOrEmpty(nameof(mode), mode);
             return Api.GetPlaybackDeviceList(mode)?.AsReadOnly();
         }
 
@@ -264,7 +270,7 @@ namespace TeamSpeak.Sdk.Client
         /// <seealso cref="GetPlaybackDevices(string)"/>
         public static ICollection<SoundDevice> GetCaptureDevices(string mode)
         {
-            Require.NotNullOrEmpty(nameof(mode), mode);
+            Sdk.Require.NotNullOrEmpty(nameof(mode), mode);
             return Api.GetCaptureDeviceList(mode)?.AsReadOnly();
         }
 
@@ -348,7 +354,7 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>the unique identifier of the identity</returns>
         public static string IdentityToUniqueIdentifier(string identity)
         {
-            Require.NotNullOrEmpty(nameof(identity), identity);
+            Sdk.Require.NotNullOrEmpty(nameof(identity), identity);
             return Api.IdentityStringToUniqueIdentifier(identity);
         }
 
@@ -383,7 +389,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="severity">The level of the message.</param>
         /// <param name="message">Text written to log.</param>
-        /// <param name="connection">Identify the current server connection when using multiple connections. Pass null if unused.</param>
+        /// <param name="connection">Identify the current server connection when using multiple connections. Pass <see langword="null"/> if unused.</param>
         /// <param name="channel">Custom text to categorize the message channel (i.e. "Client", "Sound").</param>
         /// <remarks>
         /// Log messages can be printed to stdout, logged to a file logs/ts3client_[date]__[time].log and sent to user-defined callbacks. The log output behavior is defined when initializing the client library using <see cref="LibraryParameters"/>.
@@ -391,7 +397,7 @@ namespace TeamSpeak.Sdk.Client
         /// </remarks>
         public static void Log(LogLevel severity, string message, Connection connection, string channel)
         {
-            Require.NotNullOrEmpty(nameof(message), message);
+            Sdk.Require.NotNullOrEmpty(nameof(message), message);
             Api.LogMessage(message, severity, channel ?? string.Empty, connection?.ID ?? 0);
         }
 

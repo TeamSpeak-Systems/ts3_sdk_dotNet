@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TeamSpeak.Sdk.Client
+namespace TeamSpeak.Sdk
 {
     internal static class EventHelper
     {

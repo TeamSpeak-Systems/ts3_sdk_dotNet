@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\source\Teamspeak.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Native libraries deployed by the tools/Bootstrap project (run it first). -->
+    <None Include="..\..\external\teamspeak-sdk\windows-x86_64\*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

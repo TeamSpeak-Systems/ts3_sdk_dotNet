@@ -43,7 +43,7 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="id">ID of the client</param>
         public WaveHandle(Connection connection, ulong id)
         {
-            Require.NotNull(nameof(connection), connection);
+            Sdk.Require.NotNull(nameof(connection), connection);
             ID = id;
             Connection = connection;
         }
@@ -70,7 +70,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="a">The first <see cref="WaveHandle"/> structure to compare.</param>
         /// <param name="b">The second <see cref="WaveHandle"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are equal; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are equal; otherwise, <see langword="false"/>.</returns>
         public static bool operator ==(WaveHandle a, WaveHandle b)
         {
             if (object.ReferenceEquals(a, b)) return true;
@@ -83,7 +83,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="a">The first <see cref="WaveHandle"/> structure to compare.</param>
         /// <param name="b">The second <see cref="WaveHandle"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are different; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are different; otherwise, <see langword="false"/>.</returns>
         public static bool operator !=(WaveHandle a, WaveHandle b)
         {
             return !(a == b);
@@ -93,7 +93,7 @@ namespace TeamSpeak.Sdk.Client
         /// Indicates whether this instance and a another instance  are equal.
         /// </summary>
         /// <param name="other">Another instance to compare to.</param>
-        /// <returns>true if this and  the other instance represent the same value; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if this and  the other instance represent the same value; otherwise, <see langword="false"/>.</returns>
         public bool Equals(WaveHandle other)
         {
             return this == other;
@@ -103,7 +103,7 @@ namespace TeamSpeak.Sdk.Client
         /// Indicates whether this instance and a specified object are equal.
         /// </summary>
         /// <param name="obj">Another object to compare to.</param>
-        /// <returns>true if obj and this instance are the same type and represent the same value; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if obj and this instance are the same type and represent the same value; otherwise, <see langword="false"/>.</returns>
         public override bool Equals(object obj)
         {
             return obj is WaveHandle && this == (WaveHandle)obj;

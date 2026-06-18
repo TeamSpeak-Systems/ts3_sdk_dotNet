@@ -1,0 +1,9 @@
+{
+  "origin": {
+    "url": "https://files.teamspeak-services.com/releases/sdk",
+    "version": "3.5.2"
+  },
+  "platforms": [
+    "windows-x86_64"
+  ]
+}

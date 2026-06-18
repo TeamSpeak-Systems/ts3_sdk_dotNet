@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,10 @@ namespace TeamSpeak.Sdk.Client.Example
     {
         static void Main(string[] args)
         {
+            LibraryParameters parameters = new LibraryParameters(AppContext.BaseDirectory);
+            parameters.UsedLogTypes = LogTypes.File | LogTypes.Console | LogTypes.Userlogging;
+            Library.Initialize(parameters);
+
             // Create a new server connection handler using the default
             using (Connection connection = new Connection())
             {
@@ -38,7 +43,7 @@ namespace TeamSpeak.Sdk.Client.Example
                 string identity = Library.CreateIdentity();
 
                 // Connect to server on localhost:9987 with nickname "client", no default channel, no default channel password and server password "secret"
-                Task task = connection.Start(identity, "localhost", 9987, "client", serverPassword: "secret");
+                Task connecting = connection.Start(identity, "localhost", 9987, "client", serverPassword: "secret");
 
                 Console.WriteLine("Client lib initialized and running");
 
@@ -46,7 +51,23 @@ namespace TeamSpeak.Sdk.Client.Example
                 Console.WriteLine($"Client lib version: {Library.Version}");
 
                 // Wait for connection to finish connecting
-                task.Wait();
+                try
+                {
+                    connecting.Wait();
+                }
+                catch (AggregateException e)
+                {
+                    if (e.InnerException is TeamSpeakException)
+                    {
+                        Error errorCode = ((TeamSpeakException)e.InnerException).ErrorCode;
+                        Console.WriteLine("Failed to connect to server: {0}", errorCode);
+                        return;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
 
                 // Wait for user input
                 Console.WriteLine();
@@ -133,7 +154,7 @@ namespace TeamSpeak.Sdk.Client.Example
         /// </summary>
         /// <param name="client">the moved client</param>
         /// <param name="oldChannel">the channel the leaving client was previously member of</param>
-        /// <param name="newChannel">null, as client is leaving</param>
+        /// <param name="newChannel"><see langword="null"/>, as client is leaving</param>
         /// <param name="visibility">Always <see cref="Visibility.Leave"/></param>
         /// <param name="message">Optional message giving the reason for the timeout</param>
         private static void Connection_ClientTimedOut(Client client, Channel oldChannel, Channel newChannel, Visibility visibility, string message)
@@ -146,10 +167,10 @@ namespace TeamSpeak.Sdk.Client.Example
         /// </summary>
         /// <param name="client">the client who announced the talk status change</param>
         /// <param name="status">the state of the voice transmission</param>
-        /// <param name="isReceivedWhisper">true if this event was caused by whispering, false if caused by normal talking</param>
+        /// <param name="isReceivedWhisper"><see langword="true"/> if this event was caused by whispering, <see langword="false"/> if caused by normal talking</param>
         private static void Connection_TalkStatusChanged(Client client, TalkStatus status, bool isReceivedWhisper)
         {
-            string verb = client.IsTalking ? "starts" : "stops";
+            string verb = client.Talking ? "starts" : "stops";
             Console.WriteLine($"Client {client.Nickname} {verb} talking.");
         }
         private static void Connection_ServerError(Connection connection, Error error, string returnCode, string extraMessage)

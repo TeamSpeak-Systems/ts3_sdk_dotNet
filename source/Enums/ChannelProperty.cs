@@ -1,6 +1,9 @@
 ﻿namespace TeamSpeak.Sdk
 {
-    internal enum ChannelProperty
+    /// <summary>
+    /// Channel Properties
+    /// </summary>
+    public enum ChannelProperty
     {
         /// <summary>
         /// Available for all channels that are "in view", always up-to-date
@@ -70,5 +73,14 @@
         /// How many seconds to wait before deleting this channel
         /// </summary>
         DeleteDelay,
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        /// <summary>
+        /// String.  Read only.  An identifier that uniquely identifies a channel. Available in Server >= 3.10.0
+        /// </summary>
+        /// <remarks>Available in SDK 3.1+.</remarks>
+        UniqueIdentifier,
+#endif
+        #endregion sdk_3_1
     }
 }

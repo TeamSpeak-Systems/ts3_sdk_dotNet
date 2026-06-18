@@ -63,7 +63,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="a">The first <see cref="SoundDevice"/> structure to compare.</param>
         /// <param name="b">The second <see cref="SoundDevice"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are equal; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are equal; otherwise, <see langword="false"/>.</returns>
         public static bool operator == (SoundDevice a, SoundDevice b)
         {
             return a.ID == b.ID && a.Mode == b.Mode;
@@ -73,7 +73,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="a">The first <see cref="SoundDevice"/> structure to compare.</param>
         /// <param name="b">The second <see cref="SoundDevice"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are different; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are different; otherwise, <see langword="false"/>.</returns>
         public static bool operator != (SoundDevice a, SoundDevice b)
         {
             return !(a == b);
@@ -83,7 +83,7 @@ namespace TeamSpeak.Sdk.Client
         /// Indicates whether this instance and a specified object are equal.
         /// </summary>
         /// <param name="obj">Another object to compare to.</param>
-        /// <returns>true if obj and this instance are the same type and represent the same value; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if obj and this instance are the same type and represent the same value; otherwise, <see langword="false"/>.</returns>
         public override bool Equals(object obj)
         {
             return obj is SoundDevice && this == (SoundDevice)obj;
@@ -180,11 +180,11 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="buffer">Buffer containing the playback data retrieved from the Library.</param>
         /// <param name="samples">The number of samples to acquire</param>
-        /// <returns>true if playback data is available; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if playback data is available; otherwise, <see langword="false"/>.</returns>
         public bool AcquireData(short[] buffer, int samples)
         {
-            Require.NotNull(nameof(buffer), buffer);
-            Require.ValidRange(nameof(buffer), nameof(samples), buffer, samples);
+            Sdk.Require.NotNull(nameof(buffer), buffer);
+            Sdk.Require.ValidRange(nameof(buffer), nameof(samples), buffer, samples);
             return Library.Api.AcquireCustomPlaybackData(ID, buffer, samples);
         }
 
@@ -195,8 +195,8 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="samples">The number of samples to send</param>
         public void ProcessData(short[] buffer, int samples)
         {
-            Require.NotNull(nameof(buffer), buffer);
-            Require.ValidRange(nameof(buffer), nameof(samples), buffer, samples);
+            Sdk.Require.NotNull(nameof(buffer), buffer);
+            Sdk.Require.ValidRange(nameof(buffer), nameof(samples), buffer, samples);
             Library.Api.ProcessCustomCaptureData(ID, buffer, samples);
         }
 
@@ -232,7 +232,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Releases the unmanaged resources used by the CustomDevice and optionally releases the managed resources.
         /// </summary>
-        /// <param name="disposed">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        /// <param name="disposed"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposed)
         {
             try

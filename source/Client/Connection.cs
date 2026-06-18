@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +15,7 @@ namespace TeamSpeak.Sdk.Client
     public class Connection: IDisposable
     {
         /// <summary>
-        /// ID of the client
+        /// ID of the connection
         /// </summary>
         public ulong ID { get; }
 
@@ -27,9 +24,13 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public Preprocessor Preprocessor { get; }
 
-        // TODO: improve summary
         /// <summary>
-        /// the connection as a client object
+        /// Encoder Config Parameters
+        /// </summary>
+        public EncodeConfig EncodeConfig { get; }
+
+        /// <summary>
+        /// The local client representing this connection.
         /// </summary>
         public Client Self { get; private set; }
 
@@ -47,6 +48,11 @@ namespace TeamSpeak.Sdk.Client
         /// A list of all currently visible clients on the virtual server
         /// </summary>
         public ICollection<Client> AllClients { get { return Library.Api.GetClientList(this)?.AsReadOnly(); } }
+
+        /// <summary>Returns the cached <see cref="Client"/> with the given id on this connection, or null.</summary>
+        public Client GetClient(ushort id) { return Cache.GetClient(id); }
+
+        #region events
 
         /// <summary>
         /// After calling <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> the client will be informed of the connection status changes by the event
@@ -209,6 +215,20 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public event EditMixedPlaybackVoiceDataEventHandler EditMixedPlaybackVoiceData;
 
+        #region sdk_3_1
+        /// <summary>
+        /// @brief called after audio data was aquired from the capture device, without any pre processing applied. Allows access to raw audio data.
+        ///
+        /// @param serverConnectionHandlerID specifies on which connection the callback was called
+        /// @param samples buffer of audio data
+        /// @param sampleCount how many audio frames are available in the buffer
+        /// @param channels how many audio channels are available in the buffer
+        /// @param flags allows to mute the audio stream, set LSB to 1 to mute the audio.
+        /// </summary>
+        /// <remarks>Available in SDK 3.1+.</remarks>
+        public event EditCapturedVoiceDataPreprocessEventHandler EditCapturedVoiceDataPreprocess;
+        #endregion sdk_3_1
+
         /// <summary>
         /// Called after sound is recorded from the sound device and is preprocessed. This event can be used to get/alter recorded sound. 
         /// It can also be used to determine if this sound will be send, or discarded.
@@ -241,6 +261,27 @@ namespace TeamSpeak.Sdk.Client
         /// Called after <see cref="Channel.GetFileInfo(string, string)"/> containing the reply by the server
         /// </summary>
         public event FileInfoEventHandler FileInfoReceived;
+
+        #endregion events
+
+        /// <summary>
+        /// Get a <see cref="ConnectionProperty"/> as a <see cref="string"/>
+        /// </summary>
+        /// <param name="property">the property</param>
+        /// <returns>the property as a string</returns>
+        public string this[ConnectionProperty property]
+        {
+            get { return GetString(property); }
+        }
+        /// <summary>
+        /// Get a <see cref="VirtualServerProperty"/> as a <see cref="string"/>
+        /// </summary>
+        /// <param name="property">the property</param>
+        /// <returns>the property as a string</returns>
+        public string this[VirtualServerProperty property]
+        {
+            get { return GetString(property); }
+        }
 
         /// <summary>
         /// Unique ID for this virtual server. Stays the same after restarting the server application. Always available when connected.
@@ -313,7 +354,7 @@ namespace TeamSpeak.Sdk.Client
             get { return TimeSpan.FromSeconds(GetInt(VirtualServerProperty.Uptime)); }
         }
         /// <summary>
-        /// Defines if voice data encryption is configured per channel, globally forced on or globally forced off for this virtual server. 
+        /// Defines if voice data encryption is configured per channel, or globally forced on or globally forced off for this virtual server.
         /// The default behavior is configure per channel, in this case modifying <see cref="Channel.CodecIsUnencrypted"/>
         /// defines voice data encryption of individual channels.
         /// </summary>
@@ -363,6 +404,8 @@ namespace TeamSpeak.Sdk.Client
         internal readonly ConnectionCaches Cache;
         internal readonly ChannelTracker ChannelTracker;
 
+        #region lifecycle
+
         /// <summary>
         /// Spawns a new <see cref="Connection"/>
         /// </summary>
@@ -383,6 +426,7 @@ namespace TeamSpeak.Sdk.Client
             Cache = new ConnectionCaches(this);
             ChannelTracker = new ChannelTracker();
             Preprocessor = new Preprocessor(this);
+            EncodeConfig = new EncodeConfig(this);
             ZeroChannel = new Channel(this, 0);
             Self = new Client(this, 0);
             Timeout = TimeSpan.FromSeconds(10);
@@ -405,7 +449,7 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Releases the unmanaged resources used by the CustomDevice and optionally releases the managed resources.
         /// </summary>
-        /// <param name="disposed">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        /// <param name="disposed"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposed)
         {
             if (disposed)
@@ -424,6 +468,15 @@ namespace TeamSpeak.Sdk.Client
             ((IDisposable)this).Dispose();
         }
 
+        #endregion
+
+        /// <summary>
+        /// Status of the connection to the given server
+        /// </summary>
+        public ConnectStatus Status { get { return Library.Api.GetConnectionStatus(this); } }
+
+        #region audio
+
         /// <summary>
         /// Currently open playback device. Set using <see cref="OpenPlayback(ISoundDevice)"/>
         /// </summary>
@@ -433,29 +486,6 @@ namespace TeamSpeak.Sdk.Client
         /// Currently open capture device. Set using <see cref="OpenCapture(ISoundDevice)"/>
         /// </summary>
         public ISoundDevice CaptureDevice { get; private set; }
-
-        /// <summary>
-        /// Status of the connection to the given server
-        /// </summary>
-        public ConnectStatus Status { get { return Library.Api.GetConnectionStatus(this); } }
-
-        /// <summary>
-        /// The upload speed limit for the specified virtual server in bytes/s.
-        /// </summary>
-        public ulong SpeedLimitUp
-        {
-            get { return Library.Api.GetServerConnectionHandlerSpeedLimitUp(this); }
-            set { Library.Api.SetServerConnectionHandlerSpeedLimitUp(this, value); }
-        }
-
-        /// <summary>
-        ///  The download speed limit for the specified virtual server in bytes/s.
-        /// </summary>
-        public ulong SpeedLimitDown
-        {
-            get { return Library.Api.GetServerConnectionHandlerSpeedLimitDown(this); }
-            set { Library.Api.SetServerConnectionHandlerSpeedLimitDown(this, value); }
-        }
 
         private LocalTestMode _LocalTestMode = LocalTestMode.Off;
         /// <summary>
@@ -470,7 +500,6 @@ namespace TeamSpeak.Sdk.Client
                 _LocalTestMode = value;
             }
         }
-
 
         /// <summary>
         /// Modify the voice volume of other speakers. Value is in decibel, so 0 is no modification, 
@@ -495,14 +524,14 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         public float VolumeFactorWave
         {
-            get { return GetPlaybackConfigValueAsFloat("volume_modifier"); }
-            set { SetPlaybackConfigValue("volume_modifier", value.ToString(CultureInfo.InvariantCulture)); }
+            get { return GetPlaybackConfigValueAsFloat("volume_factor_wave"); }
+            set { SetPlaybackConfigValue("volume_factor_wave", value.ToString(CultureInfo.InvariantCulture)); }
         }
 
         /// <summary>
         /// To initialize a playback device
         /// </summary>
-        /// <param name="device">the device to be used. when null, the default playback is used.</param>
+        /// <param name="device">the device to be used. when <see langword="null"/>, the default playback is used.</param>
         public void OpenPlayback(ISoundDevice device = null)
         {
             if (device != null)
@@ -520,14 +549,14 @@ namespace TeamSpeak.Sdk.Client
                 IEnumerable<ISoundDevice> soundDeviceSource = mode != CustomDevice.ModeName
                                                             ? Library.GetPlaybackDevices(mode).Cast<ISoundDevice>()
                                                             : Library.CustomDevices;
-                PlaybackDevice = soundDeviceSource.FirstOrDefault(d => d.ID == id) ?? new SoundDevice(mode, id, null); ;
+                PlaybackDevice = soundDeviceSource.FirstOrDefault(d => d.ID == id) ?? new SoundDevice(mode, id, null);
             }
         }
 
         /// <summary>
         /// To initialize a capture device
         /// </summary>
-        /// <param name="device">the device to be used. when null, the default capture is used.</param>
+        /// <param name="device">the device to be used. when <see langword="null"/>, the default capture is used.</param>
         public void OpenCapture(ISoundDevice device = null)
         {
             if (device != null)
@@ -604,9 +633,9 @@ namespace TeamSpeak.Sdk.Client
         /// <summary>
         /// Set the position, velocity and orientation of the listener in 3D space
         /// </summary>
-        /// <param name="position">3D position of the listener. If passing null, the parameter is ignored and the value not updated.</param>
-        /// <param name="forward">Forward orientation of the listener. The vector must be of unit length and perpendicular to the up vector. If passing null, the parameter is ignored and the value not updated.</param>
-        /// <param name="up">Upward orientation of the listener. The vector must be of unit length and perpendicular to the forward vector. If passing null, the parameter is ignored and the value not updated.</param>
+        /// <param name="position">3D position of the listener. If passing <see langword="null"/>, the parameter is ignored and the value not updated.</param>
+        /// <param name="forward">Forward orientation of the listener. The vector must be of unit length and perpendicular to the up vector. If passing <see langword="null"/>, the parameter is ignored and the value not updated.</param>
+        /// <param name="up">Upward orientation of the listener. The vector must be of unit length and perpendicular to the forward vector. If passing <see langword="null"/>, the parameter is ignored and the value not updated.</param>
         public void Set3DListenerAttributes(Vector? position, Vector? forward, Vector? up)
         {
             Library.Api.Systemset3DListenerAttributes(this, position, forward, up);
@@ -621,6 +650,80 @@ namespace TeamSpeak.Sdk.Client
         {
             Library.Api.Systemset3DSettings(this, distanceFactor, rolloffScale);
         }
+
+        /// <summary>
+        /// Mutes one or more clients
+        /// </summary>
+        /// <param name="clients">Array of clients to be muted</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <remarks>
+        /// Clients can be locally muted. This information is handled client-side only and not visible to other clients. It mainly serves as a sort of individual "ban" or "ignore" feature, where users can decide not to listen to certain clients anymore.
+        /// When a client becomes muted, he will no longer be heard by the muter. Also the TeamSpeak 3 server will stop sending voice packets.
+        /// The mute state is not visible to the muted client nor to other clients. It is only available to the muting client by checking <see cref="Client.Muted"/>
+        /// </remarks>
+        public Task Mute(params Client[] clients)
+        {
+            Sdk.Require.NotNull(nameof(clients), clients);
+            Sdk.Require.EntriesNotNull(nameof(clients), clients);
+            Require.SameConnection(nameof(clients), this, clients);
+            Task task;
+            Library.Api.RequestMuteClients(clients, GetNextReturnCode(out task));
+            return task;
+        }
+
+        /// <summary>
+        /// Unmute one or more clients
+        /// </summary>
+        /// <param name="clients">Array of clients to be muted</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public Task Unmute(params Client[] clients)
+        {
+            Sdk.Require.NotNull(nameof(clients), clients);
+            Sdk.Require.EntriesNotNull(nameof(clients), clients);
+            Require.SameConnection(nameof(clients), this, clients);
+            Task task;
+            Library.Api.RequestUnmuteClients(clients, GetNextReturnCode(out task));
+            return task;
+        }
+
+        /// <summary>
+        /// Play a local wave file
+        /// </summary>
+        /// <param name="path">Local path of the sound file in WAV format to be played.</param>
+        /// <param name="loop">If <see langword="true"/>, the sound will be looping until the <see cref="WaveHandle"/> is paused or closed.</param>
+        /// <returns>a waveHandle that allows controlling the playback.</returns>
+        public WaveHandle PlayWaveFile(string path, bool loop = false)
+        {
+            Sdk.Require.NotNull(nameof(path), path);
+            return Library.Api.PlayWaveFileHandle(this, path, loop);
+        }
+
+        private float GetPlaybackConfigValueAsFloat(string ident)
+        {
+            return Library.Api.GetPlaybackConfigValueAsFloat(this, ident);
+        }
+
+        private void SetPlaybackConfigValue(string ident, string value)
+        {
+            Library.Api.SetPlaybackConfigValue(this, ident, value);
+        }
+
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+        /// <summary>Creates an audio playback handle for injecting PCM into this connection.</summary>
+        public ushort CreateAudioPlaybackHandle() => Library.Api.CreateAudioPlaybackHandle(this);
+        /// <summary>Enqueues interleaved 48kHz float PCM into a playback handle.</summary>
+        public void EnqueueAudioPlaybackHandle(ushort handle, float[] buffer) => Library.Api.EnqueueAudioPlaybackHandle(this, handle, buffer);
+        /// <summary>Pauses or resumes a playback handle.</summary>
+        public void PauseAudioPlaybackHandle(ushort handle, bool pause) => Library.Api.PauseAudioPlaybackHandle(this, handle, pause);
+        /// <summary>Closes a playback handle.</summary>
+        public void CloseAudioPlaybackHandle(ushort handle) => Library.Api.CloseAudioPlaybackHandle(this, handle);
+        /// <summary>Sets the acoustic-echo-cancellation reference (render) device.</summary>
+        public void SetAECReferenceDevice(string modeID, string renderDeviceID) => Library.Api.SetAECReferenceDevice(this, modeID, renderDeviceID);
+        /// <summary>The legacy (TS3) server UUID for this connection.</summary>
+        public string LegacyUUID => Library.Api.GetServerLegacyUUID(this);
+#endif
+
+        #endregion audio
 
         #region Start/Stop
 
@@ -651,8 +754,8 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="port">UDP port of the TeamSpeak 3 server, by default 9987.</param>
         /// <param name="nickname">On login, the client attempts to take this nickname on the connected server. Note this is not necessarily the actually assigned nickname, as the server can modify the nickname ("gandalf_1" instead the requested "gandalf") or refuse blocked names.</param>
         /// <param name="defaultChannel">A channel on the TeamSpeak 3 server. If the channel exists and the user has sufficient rights and supplies the correct password if required, the channel will be joined on login.</param>
-        /// <param name="defaultChannelPassword">Password for the default channel. Pass null or an empty string if no password is required or no default channel is specified.</param>
-        /// <param name="serverPassword">Password for the server. Pass null or an empty string if the server does not require a password.</param>
+        /// <param name="defaultChannelPassword">Password for the default channel. Pass <see langword="null"/> or an empty string if no password is required or no default channel is specified.</param>
+        /// <param name="serverPassword">Password for the server. Pass <see langword="null"/> or an empty string if the server does not require a password.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <remarks> If you pass a hostname instead of an IP, the Client Lib will try to resolve it to an IP, but the function may block for an unusually long period of time while resolving is taking place. If you are relying on the function to return quickly, we recommend to resolve the hostname yourself (e.g.asynchronously) and then call with the IP instead of the hostname.</remarks>
         public Task Start(string identity, string ip, uint port, string nickname, string defaultChannel = null, string defaultChannelPassword = null, string serverPassword = null)
@@ -668,8 +771,8 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="port">UDP port of the TeamSpeak 3 server, by default 9987.</param>
         /// <param name="nickname">On login, the client attempts to take this nickname on the connected server. Note this is not necessarily the actually assigned nickname, as the server can modify the nickname ("gandalf_1" instead the requested "gandalf") or refuse blocked names.</param>
         /// <param name="defaultChannelArray">The path to a channel on the TeamSpeak 3 server. If the channel exists and the user has sufficient rights and supplies the correct password if required, the channel will be joined on login. To define the path to a subchannel of arbitrary level, create an array of channel names detailing the position of the default channel (e.g. { "grandparent", "parent", "mydefault" } ). </param>
-        /// <param name="defaultChannelPassword">Password for the default channel. Pass null or an empty string if no password is required or no default channel is specified.</param>
-        /// <param name="serverPassword">Password for the server. Pass null or an empty string if the server does not require a password.</param>
+        /// <param name="defaultChannelPassword">Password for the default channel. Pass <see langword="null"/> or an empty string if no password is required or no default channel is specified.</param>
+        /// <param name="serverPassword">Password for the server. Pass <see langword="null"/> or an empty string if the server does not require a password.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <remarks> If you pass a hostname instead of an IP, the Client Lib will try to resolve it to an IP, but the function may block for an unusually long period of time while resolving is taking place. If you are relying on the function to return quickly, we recommend to resolve the hostname yourself (e.g.asynchronously) and then call with the IP instead of the hostname.</remarks>
         public Task Start(string identity, string ip, uint port, string nickname, string[] defaultChannelArray, string defaultChannelPassword = null, string serverPassword = null)
@@ -740,6 +843,45 @@ namespace TeamSpeak.Sdk.Client
 
         #endregion Start/Stop
 
+        #region other
+
+        /// <summary>
+        /// With a whisper list set a client can talk to the specified clients and channels bypassing the standard rule that voice is only transmitted to the current channel. Whisper lists can be defined for individual clients.
+        /// </summary>
+        /// <remarks>
+        /// To control which client is allowed to whisper to own client, the Library implements an internal whisper whitelist mechanism. When a client receives a whisper while the whispering client has not yet been added to the whisper allow list, the receiving client gets the <see cref="Connection.WhisperIgnored"/>-Event. Note that whisper voice data is not received until the sending client is added to the receivers whisper allow list.
+        /// </remarks>
+        /// <param name="targetChannelArray">array of channels to whisper to, set to <see langword="null"/> to disable</param>
+        /// <param name="targetClientArray">array of clients to whisper to, set to <see langword="null"/> to disable</param>
+        public Task SetWhisperList(Channel[] targetChannelArray, Client[] targetClientArray)
+        {
+            Sdk.Require.EntriesNotNull(nameof(targetChannelArray), targetChannelArray);
+            Require.SameConnection(nameof(targetChannelArray), this, targetChannelArray);
+            Sdk.Require.EntriesNotNull(nameof(targetClientArray), targetClientArray);
+            Require.SameConnection(nameof(targetClientArray), this, targetClientArray);
+            Task task;
+            Library.Api.RequestClientSetWhisperList(this.Self, targetChannelArray, targetClientArray, this.GetNextReturnCode(out task));
+            return task;
+        }
+
+        /// <summary>
+        /// The upload speed limit for the specified virtual server in bytes/s.
+        /// </summary>
+        public ulong SpeedLimitUp
+        {
+            get { return Library.Api.GetServerConnectionHandlerSpeedLimitUp(this); }
+            set { Library.Api.SetServerConnectionHandlerSpeedLimitUp(this, value); }
+        }
+
+        /// <summary>
+        ///  The download speed limit for the specified virtual server in bytes/s.
+        /// </summary>
+        public ulong SpeedLimitDown
+        {
+            get { return Library.Api.GetServerConnectionHandlerSpeedLimitDown(this); }
+            set { Library.Api.SetServerConnectionHandlerSpeedLimitDown(this, value); }
+        }
+
         /// <summary>
         /// Subscribe to all channels on the server
         /// </summary>
@@ -781,7 +923,11 @@ namespace TeamSpeak.Sdk.Client
                 }
             };
             ServerUpdated += serverUpdated;
-            Library.Api.RequestServerVariables(this);
+
+            { 
+                LibraryVersion version = Library.Api.GetClientLibVersionNumber();
+                Library.Api.RequestServerVariables(this, (version < LibraryVersion.V_3_1_0) ? null : GetNextReturnCode(out task));
+            }
             return task;
         }
 
@@ -792,8 +938,8 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task Subscribe(params Channel[] channels)
         {
-            Require.NotNull(nameof(channels), channels);
-            Require.EntriesNotNull(nameof(channels), channels);
+            Sdk.Require.NotNull(nameof(channels), channels);
+            Sdk.Require.EntriesNotNull(nameof(channels), channels);
             Require.SameConnection(nameof(channels), this, channels);
             Task task;
             Library.Api.RequestChannelSubscribe(channels, GetNextReturnCode(out task));
@@ -806,46 +952,11 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task Unsubscribe(params Channel[] channels)
         {
-            Require.NotNull(nameof(channels), channels);
-            Require.EntriesNotNull(nameof(channels), channels);
+            Sdk.Require.NotNull(nameof(channels), channels);
+            Sdk.Require.EntriesNotNull(nameof(channels), channels);
             Require.SameConnection(nameof(channels), this, channels);
             Task task;
             Library.Api.RequestChannelUnsubscribe(channels, GetNextReturnCode(out task));
-            return task;
-        }
-
-        /// <summary>
-        /// Mutes one or more clients
-        /// </summary>
-        /// <param name="clients">Array of clients to be muted</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <remarks>
-        /// Clients can be locally muted. This information is handled client-side only and not visible to other clients. It mainly serves as a sort of individual "ban" or "ignore" feature, where users can decide not to listen to certain clients anymore.
-        /// When a client becomes muted, he will no longer be heard by the muter. Also the TeamSpeak 3 server will stop sending voice packets.
-        /// The mute state is not visible to the muted client nor to other clients. It is only available to the muting client by checking <see cref="Client.Muted"/>
-        /// </remarks>
-        public Task Mute(params Client[] clients)
-        {
-            Require.NotNull(nameof(clients), clients);
-            Require.EntriesNotNull(nameof(clients), clients);
-            Require.SameConnection(nameof(clients), this, clients);
-            Task task;
-            Library.Api.RequestMuteClients(clients, GetNextReturnCode(out task));
-            return task;
-        }
-
-        /// <summary>
-        /// Unmute one or more clients
-        /// </summary>
-        /// <param name="clients">Array of clients to be muted</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        public Task Unmute(params Client[] clients)
-        {
-            Require.NotNull(nameof(clients), clients);
-            Require.EntriesNotNull(nameof(clients), clients);
-            Require.SameConnection(nameof(clients), this, clients);
-            Task task;
-            Library.Api.RequestUnmuteClients(clients, GetNextReturnCode(out task));
             return task;
         }
 
@@ -862,14 +973,14 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="isSemiPermanent">Semi-permanent channels are not automatically deleted when the last user left but will not be restored when the server restarts.</param>
         /// <param name="codec">Codec used for this channel</param>
         /// <param name="codecQuality">Quality of channel codec of this channel. Valid values range from 0 to 10, default is 7. Higher values result in better speech quality but more bandwidth usage</param>
-        /// <param name="codecIsUnencrypted">If true, this channel is not using encrypted voice data. If false, voice data is encrypted for this channel.</param>
+        /// <param name="codecIsUnencrypted">If <see langword="true"/>, this channel is not using encrypted voice data. If <see langword="false"/>, voice data is encrypted for this channel.</param>
         /// <param name="codecLatencyFactor">Latency of this channel.</param>
         /// <returns>A task that represents the asynchronous creation of the channel.</returns>
         public Task<Channel> CreateChannel(string name, Channel parent, string topic = null, string description = null, string password = null, Channel order = null,
             bool? isPermanent = null, bool? isSemiPermanent = null,
             CodecType? codec = null, int? codecQuality = null, bool? codecIsUnencrypted = null, int? codecLatencyFactor = null)
         {
-            Require.NotNull(nameof(name), name);
+            Sdk.Require.NotNull(nameof(name), name);
             Require.SameConnection(nameof(parent), this, parent);
 
             TaskCompletionSource<Channel> taskCompletionSource = new TaskCompletionSource<Channel>();
@@ -926,9 +1037,9 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task SendTextMessage(Client client, string message)
         {
-            Require.NotNull(nameof(client), client);
+            Sdk.Require.NotNull(nameof(client), client);
             Require.SameConnection(nameof(client), this, client);
-            Require.NotNull(nameof(message), message);
+            Sdk.Require.NotNull(nameof(message), message);
             return client.SendTextMessage(message);
         }
 
@@ -940,9 +1051,9 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task SendTextMessage(Channel channel, string message)
         {
-            Require.NotNull(nameof(channel), channel);
+            Sdk.Require.NotNull(nameof(channel), channel);
             Require.SameConnection(nameof(channel), this, channel);
-            Require.NotNull(nameof(message), message);
+            Sdk.Require.NotNull(nameof(message), message);
             return channel.SendTextMessage(message);
         }
 
@@ -953,50 +1064,45 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task SendTextMessage(string message)
         {
-            Require.NotNull(nameof(message), message);
+            Sdk.Require.NotNull(nameof(message), message);
             Task task;
             Library.Api.RequestSendServerTextMsg(this, message, GetNextReturnCode(out task));
             return task;
         }
 
         /// <summary>
-        /// Move a client to a channel.
+        /// Move clients to a channel.
         /// </summary>
-        /// <param name="client">The client to move.</param>
+        /// <param name="clients">The clients to move.</param>
         /// <param name="channel">The channel to join.</param>
-        /// <param name="password">Optional password. Pass empty string or null if unused.</param>
+        /// <param name="password">Optional password. Pass empty string or <see langword="null"/> if unused.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public Task Move(Client client, Channel channel, string password = null)
+        public Task Move(Client[] clients, Channel channel, string password = null)
         {
-            Require.NotNull(nameof(client), client);
-            Require.SameConnection(nameof(client), this, client);
-            return client.MoveTo(channel, password);
+            foreach (Client client in clients)
+            {
+                Sdk.Require.NotNull(nameof(client), client);
+                Require.SameConnection(nameof(client), this, client);
+            }
+            Sdk.Require.NotNull(nameof(channel), channel);
+            Require.SameConnection(nameof(channel), this, channel);
+            Task task;
+            Library.Api.RequestClientMove(clients, channel, password, GetNextReturnCode(out task));
+            return task;
         }
 
         /// <summary>
         /// Move a channel to a new parent channel
         /// </summary>
         /// <param name="channel">The channel to be moved.</param>
-        /// <param name="newParent">The parent channel where the moved channel is to be inserted as child. Use null to insert as top-level channel.</param>
+        /// <param name="newParent">The parent channel where the moved channel is to be inserted as child. Use <see langword="null"/> to insert as top-level channel.</param>
         /// <param name="newChannelOrder">the <see cref="Channel"/> after which <paramref name="channel"/> is sorted. <see langword="null"/> meaning its going to be the first <see cref="Channel"/> under <paramref name="newParent"/>.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task Move(Channel channel, Channel newParent, Channel newChannelOrder)
         {
-            Require.NotNull(nameof(channel), channel);
+            Sdk.Require.NotNull(nameof(channel), channel);
             Require.SameConnection(nameof(channel), this, channel);
             return channel.MoveTo(newParent, newChannelOrder);
-        }
-
-        /// <summary>
-        /// Play a local wave file
-        /// </summary>
-        /// <param name="path">Local path of the sound file in WAV format to be played.</param>
-        /// <param name="loop">If true, the sound will be looping until the <see cref="WaveHandle"/> is paused or closed.</param>
-        /// <returns>a waveHandle that allows controlling the playback.</returns>
-        public WaveHandle PlayWaveFile(string path, bool loop = false)
-        {
-            Require.NotNull(nameof(path), path);
-            return Library.Api.PlayWaveFileHandle(this, path, loop);
         }
 
         /// <summary>
@@ -1005,7 +1111,7 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="client">The client to be added to the whisper allow list.</param>
         public void AllowWhispersFrom(Client client)
         {
-            Require.NotNull(nameof(client), client);
+            Sdk.Require.NotNull(nameof(client), client);
             Require.SameConnection(nameof(client), this, client);
             Library.Api.AllowWhispersFrom(client);
         }
@@ -1016,7 +1122,7 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="client">The client to be removed from the whisper allow list.</param>
         public void RemoveFromAllowedWhispersFrom(Client client)
         {
-            Require.NotNull(nameof(client), client);
+            Sdk.Require.NotNull(nameof(client), client);
             Require.SameConnection(nameof(client), this, client);
             Library.Api.RemoveFromAllowedWhispersFrom(client);
         }
@@ -1028,7 +1134,7 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous search operation.</returns>
         public Task<ICollection<Client>> FindClient(string uniqueIdentifier)
         {
-            Require.NotNullOrEmpty(nameof(uniqueIdentifier), uniqueIdentifier);
+            Sdk.Require.NotNullOrEmpty(nameof(uniqueIdentifier), uniqueIdentifier);
             bool success = Cache.ClientIDsBuilder.Register(uniqueIdentifier);
             if (success == false)
                 throw new InvalidOperationException("Can't search for the same UniqueIdentifier more then once at the same time.");
@@ -1041,6 +1147,8 @@ namespace TeamSpeak.Sdk.Client
         {
             throw new NotImplementedException();
         }
+
+        #endregion other
 
         private int GetInt(VirtualServerProperty flag)
         {
@@ -1061,15 +1169,6 @@ namespace TeamSpeak.Sdk.Client
         private ulong GetUInt64(ConnectionProperty flag)
         {
             return Library.Api.GetConnectionVariableAsUInt64(Self, flag);
-        }
-
-        private float GetPlaybackConfigValueAsFloat(string ident)
-        {
-            return Library.Api.GetPlaybackConfigValueAsFloat(this, ident);
-        }
-        private void SetPlaybackConfigValue(string ident, string value)
-        {
-            Library.Api.SetPlaybackConfigValue(this, ident, value);
         }
 
         internal Task<ICollection<T>> CollectList<T>(Task task, ReceivedListBuilder<T> builder, string key)
@@ -1119,6 +1218,8 @@ namespace TeamSpeak.Sdk.Client
                         PassStartOrStop();
                     else
                         FailStartOrStop(Error.Undefined, null);
+                    break;
+                default:
                     break;
             }
             EventHelper.Run(StatusChanged, _ => _(this, newStatus, error));
@@ -1270,15 +1371,12 @@ namespace TeamSpeak.Sdk.Client
             EventHelper.Run(PlaybackShutdownCompleted, _ => _(this));
         }
 
-        internal void OnEditPlaybackVoiceData(Client client, IntPtr samples, int sampleCount, int channels)
+        internal void OnEditPlaybackVoiceData(Client client, IntPtr samples, int frameCount, int channels)
         {
-            EditPlaybackVoiceDataEventHandler editPlaybackVoiceData = EditPlaybackVoiceData;
-            if (editPlaybackVoiceData != null)
+            EditPlaybackVoiceDataEventHandler handler = EditPlaybackVoiceData;
+            if (handler != null)
             {
-                short[] managed_samples = new short[sampleCount];
-                Marshal.Copy(samples, managed_samples, 0, sampleCount);
-                editPlaybackVoiceData(client, managed_samples, channels);
-                Marshal.Copy(managed_samples, 0, samples, sampleCount);
+                handler(client, samples, frameCount, channels);
             }
         }
 
@@ -1311,6 +1409,17 @@ namespace TeamSpeak.Sdk.Client
                     Marshal.Copy(managed_samples, 0, samples, managed_samples.Length);
             }
         }
+
+        #region sdk_3_1
+        internal void OnEditCapturedVoiceDataPreprocess(IntPtr samples, int sampleCount, int channels, ref int flags)
+        {
+            EditCapturedVoiceDataPreprocessEventHandler handler = EditCapturedVoiceDataPreprocess;
+            if (handler != null)
+            {
+                handler(this, samples, sampleCount, channels, ref flags);
+            }
+        }
+        #endregion sdk_3_1
 
         internal void OnEditCapturedVoiceData(IntPtr samples, int sampleCount, int channels, ref bool edited, ref bool cancel)
         {
@@ -1376,6 +1485,12 @@ namespace TeamSpeak.Sdk.Client
         private int ReturnCodeValue = 0;
         private const string ReturnCodePrefix = "_";
 
+        /// <summary>
+        /// Serializes the set + flush + cache sequence for self-client variables, which writes into a
+        /// shared per-connection pending buffer in the native library and is therefore not atomic on its own.
+        /// </summary>
+        internal readonly object SelfUpdateLock = new object();
+
         internal string GetNextReturnCode(out Task task)
         {
             int value = Interlocked.Increment(ref ReturnCodeValue);
@@ -1424,6 +1539,6 @@ namespace TeamSpeak.Sdk.Client
             ReturnCodes.Clear();
         }
 
-        #endregion RecturnCode
+        #endregion ReturnCode
     }
 }

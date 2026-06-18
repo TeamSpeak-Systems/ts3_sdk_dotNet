@@ -14,7 +14,7 @@
         /// </summary>
         Talking = 1,
         /// <summary>
-        /// Voice data would be transmitted, but <see cref="Client.Client.IsInputDeactivated"/> is true.
+        /// Voice data would be transmitted, but <see cref="Client.Client.IsInputDeactivated"/> is <see langword="true"/>.
         /// </summary>
         TalkingWhileDisabled = 2,
     }

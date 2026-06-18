@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+
 
 namespace TeamSpeak.Sdk.Client
 {
@@ -95,6 +92,22 @@ namespace TeamSpeak.Sdk.Client
             get { return Library.Api.GetPreProcessorInfoValueFloat(Connection, "decibel_last_period"); }
         }
 
+        #region sdk_3_1
+
+        public DenoiseLevel DenoiserLevel
+        {
+            get { return (DenoiseLevel)GetInt("denoiser_level"); }
+            set { SetInt("denoiser_level", (int)value); }
+        }
+
+        public VoiceActivityDetectionMode VadMode
+        {
+            get { return (VoiceActivityDetectionMode)GetInt("vad_mode"); }
+            set { SetInt("vad_mode", (int)value); }
+        }
+
+        #endregion sdk_3_1
+
         /// <summary>
         /// Server Connection
         /// </summary>
@@ -106,13 +119,13 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="connection">the server connection</param>
         public Preprocessor(Connection connection)
         {
-            Require.NotNull(nameof(connection), connection);
+            Sdk.Require.NotNull(nameof(connection), connection);
             Connection = connection;
         }
 
         private bool GetBool(string ident)
         {
-            switch(Library.Api.GetPreProcessorConfigValue(Connection, ident))
+            switch (Library.Api.GetPreProcessorConfigValue(Connection, ident))
             {
                 case "true": return true;
                 case "false": return false;
@@ -129,7 +142,7 @@ namespace TeamSpeak.Sdk.Client
         }
         private float GetFloat(string ident)
         {
-            const NumberStyles FloatStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint 
+            const NumberStyles FloatStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint
                                           | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingWhite;
             string value = Library.Api.GetPreProcessorConfigValue(Connection, ident);
             float result;

@@ -1,141 +1,147 @@
-TeamSpeak SDK .Net
+TeamSpeak SDK .NET
 ==================
 
-A C#-Wrapper around the native TeamSpeak-SDK. It provides the same functionality
-in a more fluent, object-oriented and asynchron API. In order to function the
-TeamSpeak 3 SDK 3.0.3.2 (http://TeamSpeak.com/downloads#sdk) must be placed in
-root of the Project.
+A C# wrapper around the native TeamSpeak SDK. It exposes the SDK's functionality
+through a fluent, object-oriented and async API, for both the **client** and the
+**server** side.
 
-Main features:
+Targets the TeamSpeak SDK **3.5.2**. The native libraries are not committed to this
+repository — they are fetched by the bootstrap tool (see *Getting the native SDK*).
 
-* Cross-platform (Windows, Linux, MacOS, Android, iOS)
-* Fully-featured TeamSpeak-SDK
-* Modern API with object-oriented design 
+Main features
+-------------
 
-Main Classes
+* Client and server wrappers over the native TeamSpeak SDK
+* Modern, object-oriented API with `async`/`Task`-based connection handling
+* Multi-targeted: `net8.0`, `net45`, `netstandard2.0`
+
+Target frameworks
+-----------------
+
+The wrapper (`source/TeamSpeak.Sdk.csproj`) builds for `netstandard2.0;net45;net8.0`.
+For modern .NET applications use `net8.0` (the minimal in-support LTS). `net45` and
+`netstandard2.0` remain for .NET Framework / Mono / Unity consumers.
+
+Getting the native SDK
+----------------------
+
+The native client/server libraries are downloaded and deployed by the bootstrap tool
+rather than checked in. The version is pinned in `tools/bootstrap_config.json`:
+
+```json
+{
+  "origin": { "url": "https://files.teamspeak-services.com/releases/sdk", "version": "3.5.2" },
+  "platforms": ["windows-x86_64"]
+}
+```
+
+Run it once (requires only the .NET SDK):
+
+```
+dotnet run --project tools/Bootstrap
+```
+
+This downloads `teamspeak-sdk-<version>.tar.gz` and deploys the client and server
+native libraries into the gitignored `external/teamspeak-sdk/<platform>/`. The example
+projects copy those libraries to their build output and load them from there, so once
+the bootstrap has run the examples build and run as-is. Add more platforms (e.g.
+`linux-x86_64`, `macos-armv8`) to the `platforms` list as needed.
+
+Main classes
 ------------
 
-* TeamSpeak.SDK.Client.Library - native clientlib
-* TeamSpeak.SDK.Client.Connection - connection to a SDK server
-* TeamSpeak.SDK.Client.Client - client on a SDK server 
-* TeamSpeak.SDK.Client.Channel - channel on a SDK server
-* TeamSpeak.SDK.Client.FileTransfer - file transfer from or to a SDK server
-* TeamSpeak.SDK.Client.WaveHandler - wave file playing locally
+Client (`TeamSpeak.Sdk.Client`):
 
-Usage in Linux, MacOS, Windows
-------------------------------
+* `Library` — the native clientlib
+* `Connection` — a connection to a SDK server
+* `Client` — a client on a SDK server
+* `Channel` — a channel on a SDK server
+* `FileTransfer` — a file transfer to or from a SDK server
+* `WaveHandle` — a wave file played back locally
 
-If the native clientlib is in the library search path or next to the sdk 
-assembly, initialising of the SDK is done automaticlly in the background.
-```
-using TeamSpeak.SDK.Client;
-/// ...
-using (Connection connection = new Connection())
-{
-	await connection.Start(identity, "localhost", 9987, "client");
-	await connection.SendTextMessage("Hello, World!");
-	await connection.Stop("And good bye!");
-}
-```
+Server (`TeamSpeak.Sdk.Server`):
 
-Initialization of the SDK can be forced at any time using `Library.Initialize`.
-```
-using TeamSpeak.SDK.Client;
-/// ...
-try
-{
-	Library.Initialize()
-}
-catch (DllNotFoundException)
-{
-  // handle missing native library
-}
-using (Connection connection = new Connection())
-{
-	// ...
-}
-``` 
+* `Library` — the native serverlib
+* `VirtualServer` — a virtual server hosted by this process
+* `Channel` / `Client` — channels and clients on a hosted virtual server
 
-If the native library is not in the search path, it must be specified 
-using TeamSpeak.SDK.Client;
-```
-using TeamSpeak.SDK.Client;
-/// ...
-try
-{
-	LibraryParameters parameters = new LibraryParameters("/tmp/renamed_libts3client_linux_amd64.so");
-	Library.Initialize(parameters);
-}
-catch (DllNotFoundException)
-{
-  // handle missing native library
-}
-/// ...
-```
-
-Encryption and logging must be configured when the library is initialized.
-This is also done in `LibraryParameters`.
-```
-LibraryParameters parameters = new LibraryParameters()
-{
-	// where the logs are written to
-	LogFileFolder = "/var/log/teamspeak/",
-	// Custom password encryption, leave unassigned for default handling
-	ClientPasswordEncrypt = EncryptClientPassword,
-	// Custom password encryption, leave unassigned for default handling
-	CustomPacketEncrypt = EncryptPacket,
-	// Custom package decryption, leave unassigned for default handling
-	CustomPacketDecrypt = DecryptPacket,
-}
-try
-{
-	Library.Initialize(parameters);
-}
-catch (DllNotFoundException)
-{
-  // handle missing native library
-}
-```
-
-Usage in Android
-----------------
-
-The SDK contains a Xamarin poject for Android, it can be found 
-in `Source/Android`. The Library only needs to be referenced to be used.
-It already contains the Android specific native libraries.
-
-```
-using TeamSpeak.SDK.Client;
-/// ...
-using (Connection connection = new Connection())
-{
-	await connection.Start(identity, "localhost", 9987, "client");
-	await connection.SendTextMessage("Hello, World!");
-	await connection.Stop("And good bye!");
-}
-```
-
-Usage in iOS
+Client usage
 ------------
 
-A Xamarin project for iOS is located at `Source/iOS`. In order for the sdk to
-work it is important that the correct static library is linked when building the
-app. For i386 and x86_64 `ts3_sdk_3.0.3.2/iOS/
-libts3client_ios_sdk_simulator.a` needs to be linked. For ARMv7, ARMv7s and ARM64
-instead link against `ts3_sdk_3.0.3.2/iOS/libts3client_ios_sdk_device.a`.
-Please see the example project in `Examples\iOS` for more details.
+If the native clientlib is on the library search path or next to the wrapper assembly,
+the SDK initializes automatically on first use:
 
-Aside from statically linking the native library, the TeamSpeak SDK is identical
-to the other platforms.
-
-```
-using TeamSpeak.SDK.Client;
-/// ...
+```csharp
+using TeamSpeak.Sdk.Client;
+// ...
 using (Connection connection = new Connection())
 {
-	await connection.Start(identity, "localhost", 9987, "client");
-	await connection.SendTextMessage("Hello, World!");
-	await connection.Stop("And good bye!");
+    string identity = Library.CreateIdentity();
+    await connection.Start(identity, "localhost", 9987, "client");
+    await connection.SendTextMessage("Hello, World!");
+    await connection.Stop("And good bye!");
 }
 ```
 
+Initialization can be forced at any time with `Library.Initialize`. Encryption, logging
+and the native-library location are configured through `LibraryParameters`:
+
+```csharp
+using TeamSpeak.Sdk.Client;
+// ...
+LibraryParameters parameters = new LibraryParameters(pathToNativeLibraryFolder)
+{
+    UsedLogTypes = LogTypes.File | LogTypes.Console,
+    LogFileFolder = "/var/log/teamspeak/",
+    // Optional custom handlers; leave unassigned for default handling:
+    // ClientPasswordEncrypt = EncryptClientPassword,
+    // CustomPacketEncrypt = EncryptPacket,
+    // CustomPacketDecrypt = DecryptPacket,
+};
+try
+{
+    Library.Initialize(parameters);
+}
+catch (DllNotFoundException)
+{
+    // handle missing native library
+}
+```
+
+The example projects pass `AppContext.BaseDirectory` as the native-library folder, since
+the bootstrapped libraries are copied next to the executable.
+
+Server usage
+------------
+
+The same package wraps the native serverlib under `TeamSpeak.Sdk.Server`. A minimal
+in-process virtual server:
+
+```csharp
+using TeamSpeak.Sdk.Server;
+// ...
+Library.Initialize(new LibraryParameters(pathToNativeLibraryFolder));
+VirtualServer server = Library.CreateVirtualServer(
+    maxClients: 8, keyPair: "", port: 9987, ip: "0.0.0.0", name: "My SDK Server");
+server.Password = "secret";
+```
+
+Examples
+--------
+
+Located in `examples/` (all `net8.0`):
+
+* `Client` — full-featured client sample
+* `ClientMinimal` — smallest client that connects and exchanges events
+* `Server` — hosts a virtual server with an interactive console
+
+Run the bootstrap first, then e.g. `dotnet run --project examples/ClientMinimal`.
+
+Mobile (Android / iOS)
+----------------------
+
+Mobile is **not currently a supported target** of this wrapper. Some Unity-Android
+binding code (`TeamSpeak.Sdk.Client.Unity`) and legacy Xamarin sample projects under
+`examples/Android` and `examples/iOS` remain in the tree, but they predate the current
+`net8.0` layout, are kept for reference only, and are not covered by the bootstrap/examples
+workflow above. First-class mobile support, if pursued, would be a separate future effort.

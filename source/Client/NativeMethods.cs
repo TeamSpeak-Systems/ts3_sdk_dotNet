@@ -1,21 +1,17 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace TeamSpeak.Sdk.Client
 {
-    internal class NativeMethods
+    internal partial class NativeMethods
     {
+#if UNITY_EDITOR || !(UNITY_ANDROID)
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error FreeMemoryDelegate(IntPtr pointer);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error InitClientLibDelegate([In]ref ClientUIFunctions functionPointers, IntPtr functionRarePointers, int usedLogTypes, UnmanagedPointer logFileFolder, UnmanagedPointer resourcesFolder);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        internal delegate Error DestroyClientLibDelegate();
+        delegate Error InitClientLibDelegate([In] ref ClientUIFunctions functionPointers, IntPtr functionRarePointers, int usedLogTypes, UnmanagedPointer logFileFolder, UnmanagedPointer resourcesFolder);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetClientLibVersionDelegate(out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -49,11 +45,11 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error OpenCaptureDeviceDelegate(ulong serverConnectionHandlerID, UnmanagedPointer modeID, UnmanagedPointer captureDevice);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error GetCurrentPlaybackDeviceNameDelegate(ulong serverConnectionHandlerID, out IntPtr result, out bool isDefault);
+        delegate Error GetCurrentPlaybackDeviceNameDelegate(ulong serverConnectionHandlerID, out IntPtr result, out int isDefault);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetCurrentPlayBackModeDelegate(ulong serverConnectionHandlerID, out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error GetCurrentCaptureDeviceNameDelegate(ulong serverConnectionHandlerID, out IntPtr result, out bool isDefault);
+        delegate Error GetCurrentCaptureDeviceNameDelegate(ulong serverConnectionHandlerID, out IntPtr result, out int isDefault);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetCurrentCaptureModeDelegate(ulong serverConnectionHandlerID, out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -77,9 +73,9 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error UnregisterCustomDeviceDelegate(UnmanagedPointer deviceID);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error ProcessCustomCaptureDataDelegate(UnmanagedPointer deviceName, [In]short[] buffer, int samples);
+        delegate Error ProcessCustomCaptureDataDelegate(UnmanagedPointer deviceName, [In] short[] buffer, int samples);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error AcquireCustomPlaybackDataDelegate(UnmanagedPointer deviceName, [Out]short[] buffer, int samples);
+        delegate Error AcquireCustomPlaybackDataDelegate(UnmanagedPointer deviceName, [Out] short[] buffer, int samples);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error SetLocalTestModeDelegate(ulong serverConnectionHandlerID, LocalTestMode status);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -90,20 +86,40 @@ namespace TeamSpeak.Sdk.Client
         delegate Error AllowWhispersFromDelegate(ulong serverConnectionHandlerID, ushort clID);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RemoveFromAllowedWhispersFromDelegate(ulong serverConnectionHandlerID, ushort clID);
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error GetWhisperReceiveWhitelistDelegate(ulong serverConnectionHandlerID, out IntPtr result);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error IsWhisperReceiveWhitelistedDelegate(ulong serverConnectionHandlerID, ushort clID, out int result);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error SetWhisperReceiveWhitelistDelegate(ulong serverConnectionHandlerID, UnmanagedPointer clientIDs);
+#endif
+        #endregion sdk_3_1
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error Systemset3DListenerAttributesDelegate(ulong serverConnectionHandlerID, IntPtr position, IntPtr forward, IntPtr up);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error Set3DWaveAttributesDelegate(ulong serverConnectionHandlerID, ulong waveHandle, [In]ref Vector position);
+        delegate Error Set3DWaveAttributesDelegate(ulong serverConnectionHandlerID, ulong waveHandle, [In] ref Vector position);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error Systemset3DSettingsDelegate(ulong serverConnectionHandlerID, float distanceFactor, float rolloffScale);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error Channelset3DAttributesDelegate(ulong serverConnectionHandlerID, ushort clientID, [In]ref Vector position);
+        delegate Error Channelset3DAttributesDelegate(ulong serverConnectionHandlerID, ushort clientID, [In] ref Vector position);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetPreProcessorInfoValueFloatDelegate(ulong serverConnectionHandlerID, UnmanagedPointer ident, out float result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetPreProcessorConfigValueDelegate(ulong serverConnectionHandlerID, UnmanagedPointer ident, out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error SetPreProcessorConfigValueDelegate(ulong serverConnectionHandlerID, UnmanagedPointer ident, UnmanagedPointer value);
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error SetKeyPressedDuringChunkDelegate();
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error GetGlobalConfigValueAsIntDelegate(UnmanagedPointer ident, out int result);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error SetGlobalConfigValueDelegate(UnmanagedPointer ident, UnmanagedPointer value);
+#endif
+        #endregion sdk_3_1
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetEncodeConfigValueDelegate(ulong serverConnectionHandlerID, UnmanagedPointer ident, out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -113,9 +129,9 @@ namespace TeamSpeak.Sdk.Client
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error SetClientVolumeModifierDelegate(ulong serverConnectionHandlerID, ushort clientID, float value);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error LogMessageDelegate(UnmanagedPointer logMessage, int severity, UnmanagedPointer channel, ulong logID);
+        delegate Error LogMessageDelegate(UnmanagedPointer logMessage, LogLevel severity, UnmanagedPointer channel, ulong logID);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate Error SetLogVerbosityDelegate(int logVerbosity);
+        delegate Error SetLogVerbosityDelegate(LogLevel logVerbosity);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetErrorMessageDelegate(uint errorCode, out IntPtr error);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -124,14 +140,26 @@ namespace TeamSpeak.Sdk.Client
         delegate Error StartConnectionWithChannelIDDelegate(ulong serverConnectionHandlerID, UnmanagedPointer identity, UnmanagedPointer ip, uint port, UnmanagedPointer nickname, ulong defaultChannelId, UnmanagedPointer defaultChannelPassword, UnmanagedPointer serverPassword);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error StopConnectionDelegate(ulong serverConnectionHandlerID, UnmanagedPointer quitMessage);
+#if !TEAMSPEAK_SDK_3_0
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error RequestClientMoveDelegate(ulong serverConnectionHandlerID, UnmanagedPointer clientIDs, ulong newChannelID, UnmanagedPointer password, UnmanagedPointer returnCode);
+#else
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestClientMoveDelegate(ulong serverConnectionHandlerID, ushort clientID, ulong newChannelID, UnmanagedPointer password, UnmanagedPointer returnCode);
+#endif
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestClientVariablesDelegate(ulong serverConnectionHandlerID, ushort clientID, UnmanagedPointer returnCode);
+#if !TEAMSPEAK_SDK_3_0
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error RequestClientKickFromChannelDelegate(ulong serverConnectionHandlerID, UnmanagedPointer clientIDs, UnmanagedPointer kickReason, UnmanagedPointer returnCode);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error RequestClientKickFromServerDelegate(ulong serverConnectionHandlerID, UnmanagedPointer clientIDs, UnmanagedPointer kickReason, UnmanagedPointer returnCode);
+#else
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestClientKickFromChannelDelegate(ulong serverConnectionHandlerID, ushort clientID, UnmanagedPointer kickReason, UnmanagedPointer returnCode);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestClientKickFromServerDelegate(ulong serverConnectionHandlerID, ushort clientID, UnmanagedPointer kickReason, UnmanagedPointer returnCode);
+#endif
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestChannelDeleteDelegate(ulong serverConnectionHandlerID, ulong channelID, int force, UnmanagedPointer returnCode);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -240,8 +268,13 @@ namespace TeamSpeak.Sdk.Client
         delegate Error GetServerVariableAsUInt64Delegate(ulong serverConnectionHandlerID, IntPtr flag, out ulong result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetServerVariableAsStringDelegate(ulong serverConnectionHandlerID, IntPtr flag, out IntPtr result);
+#if !TEAMSPEAK_SDK_3_0
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error RequestServerVariablesDelegate(ulong serverConnectionHandlerID, UnmanagedPointer returnCode);
+#else
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error RequestServerVariablesDelegate(ulong serverConnectionHandlerID);
+#endif
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error GetTransferFileNameDelegate(ushort transferID, out IntPtr result);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
@@ -298,6 +331,20 @@ namespace TeamSpeak.Sdk.Client
         delegate Error SetServerConnectionHandlerSpeedLimitDownDelegate(ulong serverConnectionHandlerID, ulong newLimit);
         [UnmanagedFunctionPointer(Native.CallingConvention)]
         delegate Error SetTransferSpeedLimitDelegate(ushort transferID, ulong newLimit);
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error CreateAudioPlaybackHandleDelegate(ulong serverConnectionHandlerID, out ushort handle);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error EnqueueAudioPlaybackHandleDelegate(ulong serverConnectionHandlerID, ushort handle, float[] buffer, int bufferSize);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error PauseAudioPlaybackHandleDelegate(ulong serverConnectionHandlerID, ushort handle, int pause);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error CloseAudioPlaybackHandleDelegate(ulong serverConnectionHandlerID, ushort handle);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error SetAECReferenceDeviceDelegate(ulong serverConnectionHandlerID, UnmanagedPointer modeID, UnmanagedPointer renderDeviceID);
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+        delegate Error GetServerLegacyUUIDDelegate(ulong serverConnectionHandlerID, out IntPtr result);
+#endif
 
         readonly FreeMemoryDelegate _FreeMemory;
         readonly InitClientLibDelegate _InitClientLib;
@@ -338,6 +385,13 @@ namespace TeamSpeak.Sdk.Client
         readonly StopVoiceRecordingDelegate _StopVoiceRecording;
         readonly AllowWhispersFromDelegate _AllowWhispersFrom;
         readonly RemoveFromAllowedWhispersFromDelegate _RemoveFromAllowedWhispersFrom;
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        readonly GetWhisperReceiveWhitelistDelegate _GetWhisperReceiveWhitelist;
+        readonly IsWhisperReceiveWhitelistedDelegate _IsWhisperReceiveWhitelisted;
+        readonly SetWhisperReceiveWhitelistDelegate _SetWhisperReceiveWhitelist;
+#endif
+        #endregion
         readonly Systemset3DListenerAttributesDelegate _Systemset3DListenerAttributes;
         readonly Set3DWaveAttributesDelegate _Set3DWaveAttributes;
         readonly Systemset3DSettingsDelegate _Systemset3DSettings;
@@ -345,7 +399,14 @@ namespace TeamSpeak.Sdk.Client
         readonly GetPreProcessorInfoValueFloatDelegate _GetPreProcessorInfoValueFloat;
         readonly GetPreProcessorConfigValueDelegate _GetPreProcessorConfigValue;
         readonly SetPreProcessorConfigValueDelegate _SetPreProcessorConfigValue;
-        //readonly GetEncodeConfigValueDelegate _GetEncodeConfigValue;
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        readonly SetKeyPressedDuringChunkDelegate _SetKeyPressedDuringChunk;
+        readonly GetGlobalConfigValueAsIntDelegate _GetGlobalConfigValueAsInt;
+        readonly SetGlobalConfigValueDelegate _SetGlobalConfigValue;
+#endif
+        #endregion
+        readonly GetEncodeConfigValueDelegate _GetEncodeConfigValue;
         readonly GetPlaybackConfigValueAsFloatDelegate _GetPlaybackConfigValueAsFloat;
         readonly SetPlaybackConfigValueDelegate _SetPlaybackConfigValue;
         readonly SetClientVolumeModifierDelegate _SetClientVolumeModifier;
@@ -442,12 +503,22 @@ namespace TeamSpeak.Sdk.Client
         readonly SetServerConnectionHandlerSpeedLimitUpDelegate _SetServerConnectionHandlerSpeedLimitUp;
         readonly SetServerConnectionHandlerSpeedLimitDownDelegate _SetServerConnectionHandlerSpeedLimitDown;
         readonly SetTransferSpeedLimitDelegate _SetTransferSpeedLimit;
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+        readonly CreateAudioPlaybackHandleDelegate _CreateAudioPlaybackHandle;
+        readonly EnqueueAudioPlaybackHandleDelegate _EnqueueAudioPlaybackHandle;
+        readonly PauseAudioPlaybackHandleDelegate _PauseAudioPlaybackHandle;
+        readonly CloseAudioPlaybackHandleDelegate _CloseAudioPlaybackHandle;
+        readonly SetAECReferenceDeviceDelegate _SetAECReferenceDevice;
+        readonly GetServerLegacyUUIDDelegate _GetServerLegacyUUID;
+#endif
+#endif // UNITY_EDITOR || !(UNITY_ANDROID)
 
         readonly SdkHandle Handle;
 
         public NativeMethods(SdkHandle handle)
         {
             Handle = handle;
+#if UNITY_EDITOR || !(UNITY_ANDROID)
             handle.GetLibraryMethod("ts3client_getClientLibVersionNumber", out _GetClientLibVersionNumber);
             LibraryVersion version = GetClientLibVersionNumber();
 
@@ -489,6 +560,14 @@ namespace TeamSpeak.Sdk.Client
             handle.GetLibraryMethod("ts3client_stopVoiceRecording", out _StopVoiceRecording);
             handle.GetLibraryMethod("ts3client_allowWhispersFrom", out _AllowWhispersFrom);
             handle.GetLibraryMethod("ts3client_removeFromAllowedWhispersFrom", out _RemoveFromAllowedWhispersFrom);
+#if !TEAMSPEAK_SDK_3_0
+            if (version >= LibraryVersion.V_3_1_0)
+            {
+                handle.GetLibraryMethod("ts3client_getWhisperReceiveWhitelist", out _GetWhisperReceiveWhitelist);
+                handle.GetLibraryMethod("ts3client_isWhisperReceiveWhitelisted", out _IsWhisperReceiveWhitelisted);
+                handle.GetLibraryMethod("ts3client_setWhisperReceiveWhitelist", out _SetWhisperReceiveWhitelist);
+            }
+#endif
             handle.GetLibraryMethod("ts3client_systemset3DListenerAttributes", out _Systemset3DListenerAttributes);
             handle.GetLibraryMethod("ts3client_set3DWaveAttributes", out _Set3DWaveAttributes);
             handle.GetLibraryMethod("ts3client_systemset3DSettings", out _Systemset3DSettings);
@@ -496,7 +575,15 @@ namespace TeamSpeak.Sdk.Client
             handle.GetLibraryMethod("ts3client_getPreProcessorInfoValueFloat", out _GetPreProcessorInfoValueFloat);
             handle.GetLibraryMethod("ts3client_getPreProcessorConfigValue", out _GetPreProcessorConfigValue);
             handle.GetLibraryMethod("ts3client_setPreProcessorConfigValue", out _SetPreProcessorConfigValue);
-            //handle.GetLibraryMethod("ts3client_getEncodeConfigValue", out _GetEncodeConfigValue);
+#if !TEAMSPEAK_SDK_3_0
+            if (version >= LibraryVersion.V_3_1_0)
+            {
+                handle.GetLibraryMethod("ts3client_setKeyPressedDuringChunk", out _SetKeyPressedDuringChunk);
+                handle.GetLibraryMethod("ts3client_getGlobalConfigValueAsInt", out _GetGlobalConfigValueAsInt);
+                handle.GetLibraryMethod("ts3client_setGlobalConfigValue", out _SetGlobalConfigValue);
+            }
+#endif
+            handle.GetLibraryMethod("ts3client_getEncodeConfigValue", out _GetEncodeConfigValue);
             handle.GetLibraryMethod("ts3client_getPlaybackConfigValueAsFloat", out _GetPlaybackConfigValueAsFloat);
             handle.GetLibraryMethod("ts3client_setPlaybackConfigValue", out _SetPlaybackConfigValue);
             handle.GetLibraryMethod("ts3client_setClientVolumeModifier", out _SetClientVolumeModifier);
@@ -594,29 +681,20 @@ namespace TeamSpeak.Sdk.Client
             handle.GetLibraryMethod("ts3client_setServerConnectionHandlerSpeedLimitUp", out _SetServerConnectionHandlerSpeedLimitUp);
             handle.GetLibraryMethod("ts3client_setServerConnectionHandlerSpeedLimitDown", out _SetServerConnectionHandlerSpeedLimitDown);
             handle.GetLibraryMethod("ts3client_setTransferSpeedLimit", out _SetTransferSpeedLimit);
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+            handle.GetLibraryMethod("ts3client_createAudioPlaybackHandle", out _CreateAudioPlaybackHandle);
+            handle.GetLibraryMethod("ts3client_enqueueAudioPlaybackHandle", out _EnqueueAudioPlaybackHandle);
+            handle.GetLibraryMethod("ts3client_pauseAudioPlaybackHandle", out _PauseAudioPlaybackHandle);
+            handle.GetLibraryMethod("ts3client_closeAudioPlaybackHandle", out _CloseAudioPlaybackHandle);
+            handle.GetLibraryMethod("ts3client_setAECReferenceDevice", out _SetAECReferenceDevice);
+            handle.GetLibraryMethod("ts3client_getServerLegacyUUID", out _GetServerLegacyUUID);
+#endif
+#endif
         }
 
-        private struct LockObject : IDisposable
+        private SdkLock Lock
         {
-            private SdkHandle Handle;
-
-            public LockObject(SdkHandle handle)
-            {
-                Handle = handle;
-                bool success = false;
-                Handle.DangerousAddRef(ref success);
-                if (success == false)
-                    throw new ObjectDisposedException(typeof(Library).FullName);
-            }
-            void IDisposable.Dispose()
-            {
-                Handle.DangerousRelease();
-            }
-        }
-
-        private LockObject Lock
-        {
-            get { return new LockObject(Handle); }
+            get { return new SdkLock(Handle); }
         }
 
         public List<T> ReadAndFreeShortIDList<T>(IntPtr pointer, Func<ushort, T> createFunc)
@@ -690,6 +768,7 @@ namespace TeamSpeak.Sdk.Client
 
         public void InitClientLib(ClientUIFunctions functionPointer, IntPtr functionRarePointers, LogTypes usedLogTypes, string logFileFolder, string resourcesFolder)
         {
+#if UNITY_EDITOR || !UNITY_ANDROID
             using (Lock)
             using (UnmanagedPointer unmanaged_logFileFolder = Native.WriteString(logFileFolder))
             using (UnmanagedPointer unmanaged_resourcesFolder = Native.WriteString(resourcesFolder))
@@ -697,6 +776,7 @@ namespace TeamSpeak.Sdk.Client
                 Error error = _InitClientLib(ref functionPointer, functionRarePointers, (int)usedLogTypes, unmanaged_logFileFolder, unmanaged_resourcesFolder);
                 Check(error);
             }
+#endif
         }
 
         public string GetClientLibVersion()
@@ -844,8 +924,10 @@ namespace TeamSpeak.Sdk.Client
             using (Lock)
             {
                 IntPtr unmanaged_result;
-                Error error = _GetCurrentPlaybackDeviceName(connection.ID, out unmanaged_result, out isDefault);
-                result = Native.ReadString(unmanaged_result);
+                int native_isDefault;
+                Error error = _GetCurrentPlaybackDeviceName(connection.ID, out unmanaged_result, out native_isDefault);
+                isDefault = native_isDefault != 0;
+                result = ReadAndFreeString(unmanaged_result);
                 Check(error);
             }
         }
@@ -867,7 +949,9 @@ namespace TeamSpeak.Sdk.Client
             using (Lock)
             {
                 IntPtr unmanaged_result;
-                Error error = _GetCurrentCaptureDeviceName(connection.ID, out unmanaged_result, out isDefault);
+                int native_isDefault;
+                Error error = _GetCurrentCaptureDeviceName(connection.ID, out unmanaged_result, out native_isDefault);
+                isDefault = native_isDefault != 0;
                 result = ReadAndFreeString(unmanaged_result);
                 Check(error);
             }
@@ -964,9 +1048,10 @@ namespace TeamSpeak.Sdk.Client
                 Error error = _UnregisterCustomDevice(unmanaged_deviceID);
                 switch (error)
                 {
-                    case Error.Ok: return true;
-                    case Error.SoundUnknownDevice: return false;
-                    default: throw Library.CreateException(error);
+                    case Error.Ok: return true;                 // regular case
+                    case Error.SoundUnknownDevice: return true; // should not happen, but accept it anyway
+                    case Error.SoundDeviceInUse: return false;  // the device is still in use, reason is most likely that the GC disposes out of order
+                    default: return false;                      // something unexpected happened -> ignore it.
                 }
             }
         }
@@ -1125,6 +1210,19 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
+        public string GetEncodeConfigValue(Connection connection, string ident)
+        {
+            using (Lock)
+            using (UnmanagedPointer unmanaged_ident = Native.WriteString(ident))
+            {
+                IntPtr unmanaged_result;
+                Error error = _GetEncodeConfigValue(connection.ID, unmanaged_ident, out unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
+                Check(error);
+                return result;
+            }
+        }
+
         public float GetPlaybackConfigValueAsFloat(Connection connection, string ident)
         {
             using (Lock)
@@ -1161,7 +1259,7 @@ namespace TeamSpeak.Sdk.Client
             using (UnmanagedPointer unmanaged_logMessage = Native.WriteString(logMessage))
             using (UnmanagedPointer unmanaged_channel = Native.WriteString(channel))
             {
-                Check(_LogMessage(unmanaged_logMessage, (int)severity, unmanaged_channel, logID));
+                Check(_LogMessage(unmanaged_logMessage, severity, unmanaged_channel, logID));
             }
         }
 
@@ -1169,7 +1267,7 @@ namespace TeamSpeak.Sdk.Client
         {
             using (Lock)
             {
-                Check(_SetLogVerbosity((int)logVerbosity));
+                Check(_SetLogVerbosity(logVerbosity));
             }
         }
 
@@ -1207,8 +1305,13 @@ namespace TeamSpeak.Sdk.Client
             using (UnmanagedPointer unmanaged_serverPassword = Native.WriteString(serverPassword ?? string.Empty))
             {
                 if (_StartConnectionWithChannelID != null)
+                {
                     return _StartConnectionWithChannelID(connection.ID, unmanaged_identity, unmanaged_ip, port, unmanaged_nickname, defaultChannelID, unmanaged_defaultChannelPassword, unmanaged_serverPassword);
-                else throw new NotSupportedException("StartConnection with defaultChannelID requires v3.0.4");
+                }
+                else
+                {
+                    throw new NotSupportedException("StartConnection with defaultChannelID requires v3.0.4");
+                }
             }
         }
 
@@ -1221,14 +1324,26 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public void RequestClientMove(Client client, Channel channel, string password, string returnCode)
+        public void RequestClientMove(Client[] clients, Channel channel, string password, string returnCode)
         {
             using (Lock)
             using (UnmanagedPointer unmanaged_password = Native.WriteString(password ?? string.Empty))
             using (UnmanagedPointer unmanaged_returnCode = Native.WriteString(returnCode))
+#if !TEAMSPEAK_SDK_3_0
+            using (UnmanagedPointer unmanaged_targetClientIDArray = Native.WriteShortIDArray(clients, GetID))
+#endif
             {
-                Error error = _RequestClientMove(client.Connection.ID, client.ID, channel.ID, unmanaged_password, unmanaged_returnCode);
-                Check(error, client.Connection, returnCode);
+                Connection connection = clients.First().Connection;
+#if !TEAMSPEAK_SDK_3_0
+                Error error = _RequestClientMove(connection.ID, unmanaged_targetClientIDArray, channel.ID, unmanaged_password, unmanaged_returnCode);
+#else
+                Error error = Error.OkNoUpdate;
+                foreach (var client in clients)
+                {
+                    error = _RequestClientMove(connection.ID, client.ID, channel.ID, unmanaged_password, unmanaged_returnCode);
+                }
+#endif
+                Check(error, connection, returnCode);
             }
         }
 
@@ -1242,25 +1357,49 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public void RequestClientKickFromChannel(Client client, string kickReason, string returnCode)
+        public void RequestClientKickFromChannel(Client[] clients, string kickReason, string returnCode)
         {
             using (Lock)
             using (UnmanagedPointer unmanaged_kickReason = Native.WriteString(kickReason ?? string.Empty))
             using (UnmanagedPointer unmanaged_returnCode = Native.WriteString(returnCode))
+#if !TEAMSPEAK_SDK_3_0
+            using (UnmanagedPointer unmanaged_targetClientIDArray = Native.WriteShortIDArray(clients, GetID))
+#endif
             {
-                Error error = _RequestClientKickFromChannel(client.Connection.ID, client.ID, unmanaged_kickReason, unmanaged_returnCode);
-                Check(error, client.Connection, returnCode);
+                Connection connection = clients.First().Connection;
+#if !TEAMSPEAK_SDK_3_0
+                Error error = _RequestClientKickFromChannel(connection.ID, unmanaged_targetClientIDArray, unmanaged_kickReason, unmanaged_returnCode);
+#else
+                Error error = Error.OkNoUpdate;
+                foreach (var client in clients)
+                {
+                    error = _RequestClientKickFromChannel(connection.ID, client.ID, unmanaged_kickReason, unmanaged_returnCode);
+                }
+#endif
+                Check(error, connection, returnCode);
             }
         }
 
-        public void RequestClientKickFromServer(Client client, string kickReason, string returnCode)
+        public void RequestClientKickFromServer(Client[] clients, string kickReason, string returnCode)
         {
             using (Lock)
             using (UnmanagedPointer unmanaged_kickReason = Native.WriteString(kickReason ?? string.Empty))
             using (UnmanagedPointer unmanaged_returnCode = Native.WriteString(returnCode))
+#if !TEAMSPEAK_SDK_3_0
+            using (UnmanagedPointer unmanaged_targetClientIDArray = Native.WriteShortIDArray(clients, GetID))
+#endif
             {
-                Error error = _RequestClientKickFromServer(client.Connection.ID, client.ID, unmanaged_kickReason, unmanaged_returnCode);
-                Check(error, client.Connection, returnCode);
+                Connection connection = clients.First().Connection;
+#if !TEAMSPEAK_SDK_3_0
+                Error error = _RequestClientKickFromServer(connection.ID, unmanaged_targetClientIDArray, unmanaged_kickReason, unmanaged_returnCode);
+#else
+                Error error = Error.OkNoUpdate;
+                foreach (var client in clients)
+                {
+                    error = _RequestClientKickFromServer(connection.ID, client.ID, unmanaged_kickReason, unmanaged_returnCode);
+                }
+#endif
+                Check(error, connection, returnCode);
             }
         }
 
@@ -1279,7 +1418,7 @@ namespace TeamSpeak.Sdk.Client
             using (Lock)
             using (UnmanagedPointer unmanaged_returnCode = Native.WriteString(returnCode))
             {
-                Error error = _RequestChannelMove(channel.Connection.ID, channel.ID, newChannelParent.ID, newChannelOrder?.ID ?? 0, unmanaged_returnCode);
+                Error error = _RequestChannelMove(channel.Connection.ID, channel.ID, newChannelParent?.ID ?? 0, newChannelOrder?.ID ?? 0, unmanaged_returnCode);
                 Check(error, channel.Connection, returnCode);
             }
         }
@@ -1771,11 +1910,18 @@ namespace TeamSpeak.Sdk.Client
             }
         }
 
-        public void RequestServerVariables(Connection connection)
+        public void RequestServerVariables(Connection connection, string returnCode)
         {
             using (Lock)
             {
+#if !TEAMSPEAK_SDK_3_0
+                using (UnmanagedPointer unmanaged_returnCode = Native.WriteString(returnCode))
+                {
+                    Check(_RequestServerVariables(connection.ID, unmanaged_returnCode));
+                }
+#else
                 Check(_RequestServerVariables(connection.ID));
+#endif
             }
         }
 
@@ -2081,6 +2227,62 @@ namespace TeamSpeak.Sdk.Client
                 Check(_SetTransferSpeedLimit(transfer.ID, newLimit));
             }
         }
+
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+        public ushort CreateAudioPlaybackHandle(Connection connection)
+        {
+            using (Lock)
+            {
+                Check(_CreateAudioPlaybackHandle(connection.ID, out ushort handle));
+                return handle;
+            }
+        }
+
+        public void EnqueueAudioPlaybackHandle(Connection connection, ushort handle, float[] buffer)
+        {
+            using (Lock)
+            {
+                Check(_EnqueueAudioPlaybackHandle(connection.ID, handle, buffer, buffer.Length));
+            }
+        }
+
+        public void PauseAudioPlaybackHandle(Connection connection, ushort handle, bool pause)
+        {
+            using (Lock)
+            {
+                Check(_PauseAudioPlaybackHandle(connection.ID, handle, pause ? 1 : 0));
+            }
+        }
+
+        public void CloseAudioPlaybackHandle(Connection connection, ushort handle)
+        {
+            using (Lock)
+            {
+                Check(_CloseAudioPlaybackHandle(connection.ID, handle));
+            }
+        }
+
+        public void SetAECReferenceDevice(Connection connection, string modeID, string renderDeviceID)
+        {
+            using (Lock)
+            using (UnmanagedPointer unmanaged_modeID = Native.WriteString(modeID))
+            using (UnmanagedPointer unmanaged_renderDeviceID = Native.WriteString(renderDeviceID))
+            {
+                Check(_SetAECReferenceDevice(connection.ID, unmanaged_modeID, unmanaged_renderDeviceID));
+            }
+        }
+
+        public string GetServerLegacyUUID(Connection connection)
+        {
+            using (Lock)
+            {
+                Error error = _GetServerLegacyUUID(connection.ID, out IntPtr unmanaged_result);
+                string result = ReadAndFreeString(unmanaged_result);
+                Check(error);
+                return result;
+            }
+        }
+#endif
 
         private static ushort GetID(Client client) { return client.ID; }
         private static ulong GetID(Channel channel) { return channel.ID; }

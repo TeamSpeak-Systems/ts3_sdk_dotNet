@@ -51,7 +51,7 @@ namespace TeamSpeak.Sdk.Client
         /// <param name="incompleteSize"> If the file is currently still being transferred, this indicates the currently transferred file size.</param>
         public FileInfo(Channel channel, string path, string name, ulong size, DateTimeOffset lastModified, FileListType type, ulong incompleteSize)
         {
-            Require.NotNull(nameof(channel), channel);
+            Sdk.Require.NotNull(nameof(channel), channel);
             Channel = channel;
             Path = path;
             Name = name;

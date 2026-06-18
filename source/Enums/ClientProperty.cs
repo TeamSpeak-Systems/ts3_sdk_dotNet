@@ -1,6 +1,9 @@
 ﻿namespace TeamSpeak.Sdk
 {
-    internal enum ClientProperty
+    /// <summary>
+    /// Client Properties
+    /// </summary>
+    public enum ClientProperty
     {
         /// <summary>
         /// automatically up-to-date for any  "in view", can be used to identify this particular  installation
@@ -86,6 +89,22 @@
         /// SDK use, not used by TeamSpeak. Hash is provided by an outside source. A channel will use the security salt + other  data to calculate a hash, which must be the same as the one provided here.
         /// </summary>
         SecurityHash,
+        #region sdk_3_1
+#if !TEAMSPEAK_SDK_3_0
+        /// <summary>
+        /// Read only.  SDK only. List of available ciphers this client can use.
+        /// </summary>
+        /// <remarks>Available in SDK 3.1+.</remarks>
+        EncryptionCiphers,
+#endif
+        #endregion sdk_3_1
+#if !TEAMSPEAK_SDK_3_0 && !TEAMSPEAK_SDK_3_1
+        /// <summary>
+        /// bool. Read only. Is currently streaming.
+        /// </summary>
+        /// <remarks>Available in SDK 3.5+.</remarks>
+        IsStreaming,
+#endif
     };
 
 }

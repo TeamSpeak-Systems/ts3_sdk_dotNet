@@ -68,14 +68,14 @@ namespace TeamSpeak.Sdk.Client.Example
             Console.WriteLine($"Capture: {Connection.CaptureDevice}");
 
             string identity = ReadIdentity() ?? Library.CreateIdentity();
-            Task starting = Connection.Start(identity, "localhost", 9987, "client", serverPassword: "secret");
+            Task connecting = Connection.Start(identity, "127.0.0.1", 9987, "client", serverPassword: "secret");
 
             Console.WriteLine("Client lib initialized and running");
-            Console.WriteLine($"Client lib version: {Library.Version}({Library.VersionNumber})");
+            Console.WriteLine($"Client lib version: {Library.Version}");
 
             try
             {
-                starting.Wait();
+                connecting.Wait();
             }
             catch (AggregateException e)
             {
@@ -91,7 +91,7 @@ namespace TeamSpeak.Sdk.Client.Example
                 }
             }
             Console.WriteLine();
-            Console.WriteLine("TeamSpeak 3 client commandline interface");
+            Console.WriteLine("TeamSpeak client commandline interface");
             ShowHelp();
 
             do
@@ -122,7 +122,7 @@ namespace TeamSpeak.Sdk.Client.Example
 
         private static void Initialize()
         {
-            LibraryParameters parameters = new LibraryParameters("../../../../ts3_sdk_3.0.4/bin/");
+            LibraryParameters parameters = new LibraryParameters(AppContext.BaseDirectory);
             parameters.UsedLogTypes = LogTypes.File | LogTypes.Console | LogTypes.Userlogging;
             Library.Initialize(parameters);
 
@@ -335,11 +335,6 @@ namespace TeamSpeak.Sdk.Client.Example
             }
         }
 
-        public static Client AskForWhisperClient()
-        {
-            return SelectClient("Select the client whose whisper list should be modified (0 for self):") ?? Connection.Self;
-        }
-
         static Channel SelectChannel()
         {
             foreach (Channel channel in Connection.AllChannels)
@@ -352,24 +347,6 @@ namespace TeamSpeak.Sdk.Client.Example
             ulong result;
             if (ulong.TryParse(Console.ReadLine(), out result) && result != 0)
                 return new Channel(Connection, result);
-            else return null;
-        }
-
-        static Client SelectClient(string question)
-        {
-            foreach (Channel channel in Connection.AllChannels)
-            {
-                StringBuilder ident = new StringBuilder();
-                for (Channel c = channel; c != null; c = c.Parent)
-                    ident.Append("  ");
-                Console.WriteLine($"{ident}{channel.Name}");
-                foreach (Client client in channel.Clients)
-                    Console.WriteLine($"{ident}  {client.ID} {client.Nickname}");
-            }
-            Console.Write(question);
-            ushort result;
-            if (ushort.TryParse(Console.ReadLine(), out result) && result != 0)
-                return new Client(Connection, result);
             else return null;
         }
 
@@ -456,7 +433,7 @@ namespace TeamSpeak.Sdk.Client.Example
             else
             {
                 foreach (Client client in Connection.AllClients)
-                    Console.WriteLine("{0} - {1} ({2}talking)", client.ID, client.Nickname, client.IsTalking ? "" : "not ");
+                    Console.WriteLine("{0} - {1} ({2}talking)", client.ID, client.Nickname, client.Talking ? "" : "not ");
             }
             Console.WriteLine();
         }
@@ -576,25 +553,21 @@ namespace TeamSpeak.Sdk.Client.Example
 
         private static void SetWhisperList()
         {
-            Client client = AskForWhisperClient() ?? Connection.Self;
             Console.WriteLine();
             Console.Write("Enter target channel ID: ");
             ulong channelID;
             if (ulong.TryParse(Console.ReadLine(), out channelID) == false)
                 channelID = 0;
+
             Channel channel = new Channel(Connection, channelID);
-            client.SetWhisperList(new Channel[] { channel }, null);
-            Console.WriteLine($"Whisper list requested for client {client.Nickname} in channel {channel.Name}");
+            Connection.SetWhisperList(new Channel[] { channel }, null);
+            Console.WriteLine($"Whisper list requested.");
         }
 
         private static void ClearWhisperList()
         {
-            Client client = AskForWhisperClient() ?? Connection.Self;
-            if (client != null)
-            {
-                client.SetWhisperList((Channel[])null, (Client[])null);
-                Console.WriteLine($"Whisper list cleared for client {client.Nickname}");
-            }
+            Connection.SetWhisperList((Channel[])null, (Client[])null);
+            Console.WriteLine($"Whisper list cleared.");
         }
 
         private static void ConfigureMicrophone()

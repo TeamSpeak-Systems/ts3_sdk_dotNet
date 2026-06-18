@@ -36,6 +36,19 @@ namespace TeamSpeak.Sdk.Client
         }
 
         /// <summary>
+        /// Returns the <see cref="Channel"/> with this id
+        /// </summary>
+        /// <param name="id">id of the channel</param>
+        /// <returns>a <see cref="Channel"/> with a matching name</returns>
+        public Channel this[ulong id]
+        {
+            get
+            {
+                return Channels.First(c => c.ID == id);
+            }
+        }
+
+        /// <summary>
         /// Gets the number of elements actually contained in the <see cref="ReadonlyChannelCollection"/>
         /// </summary>
         public int Count { get { return Channels.Count; } }
@@ -43,7 +56,7 @@ namespace TeamSpeak.Sdk.Client
         /// Determines whether an <see cref="Channel"/> is in the <see cref="ReadonlyChannelCollection"/>
         /// </summary>
         /// <param name="item">The <see cref="Channel"/> to locate in the <see cref="ReadonlyChannelCollection"/></param>
-        /// <returns>true if item is found in the <see cref="ReadonlyChannelCollection"/> otherwise, false.</returns>
+        /// <returns><see langword="true"/> if item is found in the <see cref="ReadonlyChannelCollection"/> otherwise, <see langword="false"/>.</returns>
         public bool Contains(Channel item) { return Channels.Contains(item); }
         void ICollection.CopyTo(Array array, int index) { ((ICollection)Channels).CopyTo(array, index); }
         /// <summary>

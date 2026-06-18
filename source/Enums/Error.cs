@@ -1,9 +1,9 @@
-﻿namespace TeamSpeak.Sdk
+namespace TeamSpeak.Sdk
 {
     /// <summary>
     /// Error-Codes the Library can return
     /// </summary>
-    public enum Error: ushort
+    public enum Error : uint
     {
 #pragma warning disable 1591
         Ok = 0x0000,
@@ -12,6 +12,8 @@
         OkNoUpdate = 0x0003,
         DontNotify = 0x0004,
         LibTimeLimitReached = 0x0005,
+        OutOfMemory = 0x0006,
+        Canceled = 0x0007,
         CommandNotFound = 0x0100,
         UnableToBindNetworkPort = 0x0101,
         NoNetworkPortAvailable = 0x0102,
@@ -46,7 +48,6 @@
         ChannelInvalidOrder = 0x030b,
         ChannelNoFiletransferSupported = 0x030c,
         ChannelInvalidPassword = 0x030d,
-        ChannelIsPrivateChannel = 0x030e,
         ChannelInvalidSecurityHash = 0x030f,
         ServerInvalidId = 0x0400,
         ServerRunning = 0x0401,
@@ -90,7 +91,9 @@
         ServerlibraryNotInitialised = 0x070a,
         WhisperTooManyTargets = 0x070b,
         WhisperNoTargets = 0x070c,
-        ConnectionIPProtocolMissing = 0x070d,
+        ConnectionIpProtocolMissing = 0x070d,
+        HandshakeFailed = 0x070e,
+        IllegalServerLicense = 0x070f,
         FileInvalidName = 0x0800,
         FileInvalidPermissions = 0x0801,
         FileAlreadyExists = 0x0802,
@@ -115,6 +118,7 @@
         FileTransferClientQuotaExceeded = 0x0815,
         FileTransferReset = 0x0816,
         FileTransferLimitReached = 0x0817,
+        FileInvalidStorageClass = 0x0818,
         SoundPreprocessorDisabled = 0x0900,
         SoundInternalPreprocessor = 0x0901,
         SoundInternalEncoder = 0x0902,
@@ -167,7 +171,7 @@
         AccountingInstanceDuplicated = 0x0b0b,
         AccountingAlreadyStarted = 0x0b0c,
         AccountingNotStarted = 0x0b0d,
-        AccountingToManyStarts = 0x0b0e,
+        AccountingTooManyStarts = 0x0b0e,
         MessageInvalidId = 0x0c00,
         BanInvalidId = 0x0d00,
         ConnectFailedBanned = 0x0d01,
@@ -175,14 +179,6 @@
         BanFlooding = 0x0d03,
         TtsUnableToInitialize = 0x0e00,
         PrivilegeKeyInvalid = 0x0f00,
-        VoipPjsua = 0x1000,
-        VoipAlreadyInitialized = 0x1001,
-        VoipTooManyAccounts = 0x1002,
-        VoipInvalidAccount = 0x1003,
-        VoipInternalError = 0x1004,
-        VoipInvalidConnectionId = 0x1005,
-        VoipCannotAnswerInitiatedCall = 0x1006,
-        VoipNotInitialized = 0x1007,
         ProvisioningInvalidPassword = 0x1100,
         ProvisioningInvalidRequest = 0x1101,
         ProvisioningNoSlotsAvailable = 0x1102,
@@ -204,6 +200,20 @@
         ProvisioningInvalidTimeout = 0x1118,
         ProvisioningTs3serverNotFound = 0x1119,
         ProvisioningNoPermission = 0x111A,
+        OkNoErrorEvent = 0x0008,
+        CommandLineParseFailed = 0x0104,
+        CommandLineExitVersion = 0x0105,
+        CommandLineExitHelp = 0x0106,
+        FileTransferChannelQuotaExceeded = 0x081a,
+        AlreadyRegistered = 0x1600,
+        StreamSessionLimitReached = 0x1601,
+        StreamSessionNotFound = 0x1602,
+        StreamUnknown = 0x1603,
+        StreamNotParticipating = 0x1604,
+        NotStreamer = 0x1605,
+        AlreadyJoined = 0x1606,
+        JoinRequestNotFound = 0x1607,
+        SfuFailedToStart = 0x1608,
 #pragma warning restore
     }
 }

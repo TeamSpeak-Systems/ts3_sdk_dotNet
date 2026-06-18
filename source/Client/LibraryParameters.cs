@@ -19,7 +19,7 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>true if a matching binary exists</returns>
         public static bool TryGetNativeBinaryName(out string[] names, out SupportedPlatform platform)
         {
-            return PlatformSpecific.TryGetNativeBinaryName(out names, out platform);
+            return PlatformSpecific.TryGetNativeBinaryNameClient(out names, out platform);
         }
         
         /// <summary>
@@ -43,7 +43,7 @@ namespace TeamSpeak.Sdk.Client
         public LogTypes UsedLogTypes { get; set; }
 
         /// <summary>
-        /// Defines the location where the logs are written to. Pass null for the default behavior, which is to use a folder called logs in the current working directory.
+        /// Defines the location where the logs are written to. Pass <see langword="null"/> for the default behavior, which is to use a folder called logs in the current working directory.
         /// </summary>
         public string LogFileFolder { get; set; }
 
@@ -111,8 +111,12 @@ namespace TeamSpeak.Sdk.Client
             }
             if (teamSpeakBinaryFolder == null || Path.IsPathRooted(teamSpeakBinaryFolder) == false)
             {
-                string root = Path.GetDirectoryName(Path.GetFullPath(typeof(SdkHandle).Assembly.Location));
-                result = result.Concat(result.Select(s => s == null ? null : Path.Combine(root, s)));
+                string location = typeof(SdkHandle).Assembly.Location;
+                if (!String.IsNullOrEmpty(location))
+                {
+                    string root = Path.GetDirectoryName(Path.GetFullPath(location));
+                    result = result.Concat(result.Select(s => s == null ? null : Path.Combine(root, s)));
+                }
             }
             return result.ToArray();
         }

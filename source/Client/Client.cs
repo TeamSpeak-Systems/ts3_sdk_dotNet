@@ -16,16 +16,19 @@ namespace TeamSpeak.Sdk.Client
         /// ID of the client
         /// </summary>
         public ushort ID { get; internal set; }
+
         /// <summary>
         /// Server Connection
         /// </summary>
         public Connection Connection { get; }
+
         /// <summary>
-        /// The channel the client is currently joined
+        /// The channel the client is currently joined.
         /// </summary>
         public Channel Channel { get { return Library.Api.GetChannelOfClient(this); } }
+
         /// <summary>
-        /// Server ConnectionInfo
+        /// Information about the <see cref="Client"/> connection.
         /// </summary>
         public ConnectionInfo ConnectionInfo { get; }
 
@@ -47,7 +50,7 @@ namespace TeamSpeak.Sdk.Client
         
         internal Client(Connection connection, ushort id, bool waitForProperties)
         {
-            Require.NotNull(nameof(connection), connection);
+            Sdk.Require.NotNull(nameof(connection), connection);
             ID = id;
             Connection = connection;
             ConnectionInfo = new ConnectionInfo(this);
@@ -56,31 +59,44 @@ namespace TeamSpeak.Sdk.Client
         }
 
         /// <summary>
-        /// Unique ID for this client. Stays the same after restarting the application, so you can use this to identify individual users
+        /// Get a <see cref="ClientProperty"/> as a <see cref="string"/>
+        /// </summary>
+        /// <param name="property">the property</param>
+        /// <returns>the property as a string</returns>
+        public string this[ClientProperty property]
+        {
+            get { return GetString(property); }
+        }
+
+        /// <summary>
+        /// Unique ID for this client. Stays the same after restarting the application, so you can use this to identify individual users.
         /// </summary>
         public string UniqueIdentifier
         {
             get { return GetString(ClientProperty.UniqueIdentifier, CachedUniqueIdentifier); }
         }
+
         /// <summary>
-        /// Nickname used by the client. This value is always automatically updated for visible clients
+        /// Nickname used by the client. This value is always automatically updated for visible clients.
         /// </summary>
         public string Nickname
         {
             get { return GetString(ClientProperty.Nickname, CachedNickname); }
             set
             {
-                Require.NotNull(nameof(value), value);
+                Sdk.Require.NotNull(nameof(value), value);
                 SetString(ClientProperty.Nickname, value, ref CachedNickname);
             }
         }
+
         /// <summary>
-        /// Application version used by this client. Needs to be requested with <see cref="RequestClientVariables"/> unless called on own client
+        /// Application version used by this client. Needs to be requested with <see cref="RequestClientVariables"/> unless called on own client.
         /// </summary>
         public string Version
         {
             get { return GetString(ClientProperty.Version); }
         }
+
         /// <summary>
         /// Operating system used by this client. Needs to be requested with <see cref="RequestClientVariables"/> unless called on own client.
         /// </summary>
@@ -88,86 +104,112 @@ namespace TeamSpeak.Sdk.Client
         {
             get { return GetString(ClientProperty.Platform); }
         }
+
+        /// <summary>
+        /// Set when the client is currently sending voice data to the server.
+        /// </summary>
+        /// <remarks>Always available for visible clients.</remarks>
+        public bool Talking
+        {
+            get { return this.FlagTalking == TalkStatus.Talking; }
+        }
+
         /// <summary>
         /// Set when the client is currently sending voice data to the server. Always available for visible clients.
+        /// Takes TalkStatus.TalkingWhileDisabled (own client) into account
         /// </summary>
-        public bool IsTalking
+        public TalkStatus FlagTalking
         {
-            get { return GetBool(ClientProperty.FlagTalking); }
+            get { return (TalkStatus)GetInt(ClientProperty.FlagTalking); }
         }
+
         /// <summary>
-        /// Indicates the mute status of the clients capture device. Always available for visible clients
+        /// Indicates the mute status of the clients capture device.
         /// </summary>
+        /// <remarks>Always available for visible clients.</remarks>
         public bool InputMuted
         {
             get { return GetBool(ClientProperty.InputMuted); }
             set { SetBool(ClientProperty.InputMuted, value); }
         }
+
         /// <summary>
-        /// Indicates the combined mute status of the clients playback and capture devices. Always available for visible clients
+        /// Indicates the combined mute status of the clients playback and capture devices.
         /// </summary>
+        /// <remarks>Always available for visible clients</remarks>
         public bool OutputMuted
         {
             get { return GetBool(ClientProperty.OutputMuted); }
             set { SetBool(ClientProperty.OutputMuted, value); }
         }
+
         /// <summary>
-        /// Indicates the mute status of the clients playback device. Always available for visible clients
+        /// Indicates the mute status of the clients playback device.
         /// </summary>
+        /// <remarks>Always available for visible clients.</remarks>
         public bool OutputOnlyMuted
         {
             get { return GetBool(ClientProperty.OutputonlyMuted); }
         }
+
         /// <summary>
-        /// Set if the clients capture device is not available. Always available for visible clients
+        /// Set if the clients capture device is not available.
         /// </summary>
-        public bool InputHardwareEnabled
+        /// <remarks>Always available for visible clients.</remarks>
+        public bool InputHardware
         {
             get { return GetBool(ClientProperty.InputHardware); }
         }
+
         /// <summary>
-        /// True if the clients playback device is not available. Always available for visible clients
+        /// <see langword="true"/> if the clients playback device is not available.
         /// </summary>
+        /// <remarks>Always available for visible clients.</remarks>
         public bool OutputHardware
         {
             get { return GetBool(ClientProperty.OutputHardware); }
         }
 
         /// <summary>
-        /// Determines if the sound input is deactivated , only usable for <see cref="Connection.Self"/>, not propagated to the network.
+        /// Determines if the sound input is deactivated
         /// </summary>
-        public bool IsInputDeactivated
+        /// <remarks>Is only usable for <see cref="Connection.Self"/>, as it is not propagated over the network.</remarks>
+        public bool InputDeactivated
         {
             get { return GetBool(ClientProperty.InputDeactivated); }
             set { SetBool(ClientProperty.InputDeactivated, value); }
         }
 
         /// <summary>
-        /// Time the client has been idle. Needs to be requested with <see cref="RequestClientVariables"/>
+        /// Time the client has been idle. Needs to be requested with <see cref="RequestClientVariables"/>.
         /// </summary>
         public TimeSpan IdleTime
         {
             get { return TimeSpan.FromSeconds(GetInt(ClientProperty.IdleTime)); }
         }
+
         /// <summary>
-        /// Default channel name used in the last <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> call. Only available for own client
+        /// Default channel name used in the last <see cref="O:TeamSpeak.Sdk.Client.Connection.Start"/> call.
         /// </summary>
+        /// <remarks>Only available for own client.</remarks>
         public string DefaultChannel
         {
             get { return GetString(ClientProperty.DefaultChannel); }
         }
+
         /// <summary>
-        /// Not used by TeamSpeak 3, offers free storage for SDK users. Always available for visible clients
+        /// Not used by TeamSpeak, offers free storage for SDK users. Always available for visible clients.
         /// </summary>
         public string MetaData
         {
             get { return GetString(ClientProperty.MetaData, CachedMetaData); }
             set
             {
-                Require.NotNull(nameof(value), value);
+                Sdk.Require.NotNull(nameof(value), value);
                 SetString(ClientProperty.MetaData, value, ref CachedMetaData);
             }
         }
+
         /// <summary>
         /// Indicates a client has been locally muted. Client-side only
         /// </summary>
@@ -180,6 +222,7 @@ namespace TeamSpeak.Sdk.Client
                 else Connection.Unmute(this);
             }
         }
+
         /// <summary>
         /// Indicates a client is currently recording all voice data in his channel
         /// </summary>
@@ -187,6 +230,7 @@ namespace TeamSpeak.Sdk.Client
         {
             get { return GetBool(ClientProperty.IsRecording); }
         }
+
         /// <summary>
         /// The client volume modifier
         /// </summary>
@@ -200,14 +244,14 @@ namespace TeamSpeak.Sdk.Client
         /// Switch the client to a certain channel.
         /// </summary>
         /// <param name="channel">the channel to join.</param>
-        /// <param name="password">Optional password. Pass empty string or null if unused.</param>
+        /// <param name="password">Optional password. Pass <see cref="string.Empty"/> or <see langword="null"/> if unused.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task MoveTo(Channel channel, string password = null)
         {
-            Require.NotNull(nameof(channel), channel);
+            Sdk.Require.NotNull(nameof(channel), channel);
             Require.SameConnection(nameof(channel), Connection, channel);
             Task task;
-            Library.Api.RequestClientMove(this, channel, password, Connection.GetNextReturnCode(out task));
+            Library.Api.RequestClientMove(new Client[] { this }, channel, password, Connection.GetNextReturnCode(out task));
             return task;
         }
 
@@ -238,7 +282,7 @@ namespace TeamSpeak.Sdk.Client
         public Task KickFromChannel(string kickReason = null)
         {
             Task task;
-            Library.Api.RequestClientKickFromChannel(this, kickReason, Connection.GetNextReturnCode(out task));
+            Library.Api.RequestClientKickFromChannel(new Client[] { this }, kickReason, Connection.GetNextReturnCode(out task));
             return task;
         }
 
@@ -250,7 +294,7 @@ namespace TeamSpeak.Sdk.Client
         public Task KickFromServer(string kickReason = null)
         {
             Task task;
-            Library.Api.RequestClientKickFromServer(this, kickReason, Connection.GetNextReturnCode(out task));
+            Library.Api.RequestClientKickFromServer(new Client[] { this }, kickReason, Connection.GetNextReturnCode(out task));
             return task;
         }
 
@@ -261,9 +305,25 @@ namespace TeamSpeak.Sdk.Client
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task SendTextMessage(string message)
         {
-            Require.NotNull(nameof(message), message);
+            Sdk.Require.NotNull(nameof(message), message);
             Task task;
             Library.Api.RequestSendPrivateTextMsg(this, message, Connection.GetNextReturnCode(out task));
+            return task;
+        }
+
+        /// <summary>
+        /// Set the whisper list for this client.
+        /// </summary>
+        /// <param name="targetChannelArray">channels that should receive the whispers</param>
+        /// <param name="targetClientArray">clients that should receive the whispers</param>
+        public Task SetWhisperList(Channel[] targetChannelArray, Client[] targetClientArray)
+        {
+            Sdk.Require.EntriesNotNull(nameof(targetChannelArray), targetChannelArray);
+            Require.SameConnection(nameof(targetChannelArray), Connection, targetChannelArray);
+            Sdk.Require.EntriesNotNull(nameof(targetClientArray), targetClientArray);
+            Require.SameConnection(nameof(targetClientArray), Connection, targetClientArray);
+            Task task;
+            Library.Api.RequestClientSetWhisperList(this, targetChannelArray, targetClientArray, Connection.GetNextReturnCode(out task));
             return task;
         }
 
@@ -277,31 +337,11 @@ namespace TeamSpeak.Sdk.Client
         }
 
         /// <summary>
-        /// With a whisper list set a client can talk to the specified clients and channels bypassing the standard rule that voice is only transmitted to the current channel. Whisper lists can be defined for individual clients.
-        /// </summary>
-        /// <remarks>
-        /// To control which client is allowed to whisper to own client, the Library implements an internal whisper whitelist mechanism. When a client receives a whisper while the whispering client has not yet been added to the whisper allow list, the receiving client gets the <see cref="Connection.WhisperIgnored"/>-Event. Note that whisper voice data is not received until the sending client is added to the receivers whisper allow list.
-        /// </remarks>
-        /// <param name="targetChannelArray">array of channels to whisper to, set to null to disable</param>
-        /// <param name="targetClientArray">array of clients to whisper to, set to null to disable</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        public Task SetWhisperList(Channel[] targetChannelArray, Client[] targetClientArray)
-        {
-            Require.EntriesNotNull(nameof(targetChannelArray), targetChannelArray);
-            Require.SameConnection(nameof(targetChannelArray), Connection, targetChannelArray);
-            Require.EntriesNotNull(nameof(targetClientArray), targetClientArray);
-            Require.SameConnection(nameof(targetClientArray), Connection, targetClientArray);
-            Task task;
-            Library.Api.RequestClientSetWhisperList(this, targetChannelArray, targetClientArray, Connection.GetNextReturnCode(out task));
-            return task;
-        }
-
-        /// <summary>
         /// Compares two <see cref="Client"/> for equality. 
         /// </summary>
         /// <param name="a">The first <see cref="Client"/> structure to compare.</param>
         /// <param name="b">The second <see cref="Client"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are equal; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are equal; otherwise, <see langword="false"/>.</returns>
         public static bool operator ==(Client a, Client b)
         {
             if (object.ReferenceEquals(a, b)) return true;
@@ -314,7 +354,7 @@ namespace TeamSpeak.Sdk.Client
         /// </summary>
         /// <param name="a">The first <see cref="Client"/> structure to compare.</param>
         /// <param name="b">The second <see cref="Client"/> structure to compare.</param>
-        /// <returns>true if the ID and Mode of a and b are different; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the ID and Mode of a and b are different; otherwise, <see langword="false"/>.</returns>
         public static bool operator !=(Client a, Client b)
         {
             return !(a == b);
@@ -336,7 +376,7 @@ namespace TeamSpeak.Sdk.Client
         /// Indicates whether this instance and a another instance  are equal.
         /// </summary>
         /// <param name="other">Another instance to compare to.</param>
-        /// <returns>true if this and  the other instance represent the same value; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if this and  the other instance represent the same value; otherwise, <see langword="false"/>.</returns>
         public bool Equals(Client other)
         {
             return this == other;
@@ -346,7 +386,7 @@ namespace TeamSpeak.Sdk.Client
         /// Indicates whether this instance and a specified object are equal.
         /// </summary>
         /// <param name="obj">Another object to compare to.</param>
-        /// <returns>true if obj and this instance are the same type and represent the same value; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if obj and this instance are the same type and represent the same value; otherwise, <see langword="false"/>.</returns>
         public override bool Equals(object obj)
         {
             return obj is Client && this == (Client)obj;
@@ -365,18 +405,22 @@ namespace TeamSpeak.Sdk.Client
         {
             return Library.Api.GetClientVariableAsInt(this, flag);
         }
+
         private  bool GetBool(ClientProperty flag)
         {
             return GetInt(flag) != 0;
         }
+
         private ulong GetUInt64(ClientProperty flag)
         {
             return Library.Api.GetClientVariableAsUInt64(this, flag);
         }
+
         private string GetString(ClientProperty flag)
         {
             return Library.Api.GetClientVariableAsString(this, flag);
         }
+
         private string GetString(ClientProperty flag, string cache)
         {
             string result;
@@ -385,33 +429,35 @@ namespace TeamSpeak.Sdk.Client
                 return result;
             else return cache;
         }
+
         private void SetInt(ClientProperty flag, int value)
         {
             if (this != Connection.Self) throw new NotSupportedException();
-            Library.Api.SetClientSelfVariableAsInt(Connection, flag, value);
-            FlushClientSelfUpdates();
+            lock (Connection.SelfUpdateLock)
+            {
+                Library.Api.SetClientSelfVariableAsInt(Connection, flag, value);
+                FlushClientSelfUpdates();
+            }
         }
+
         private void SetBool(ClientProperty flag, bool value)
         {
             SetInt(flag, value ? 1 : 0);
         }
-        private void SetUInt64(ClientProperty flag)
-        {
-            if (this != Connection.Self) throw new NotSupportedException();
-            Library.Api.GetClientVariableAsUInt64(this, flag);
-            FlushClientSelfUpdates();
-        }
+
         private void SetString(ClientProperty flag, string value, ref string cache)
         {
             if (this != Connection.Self) throw new NotSupportedException();
-            Library.Api.SetClientSelfVariableAsString(Connection, flag, value);
-            FlushClientSelfUpdates();
-            cache = value;
+            lock (Connection.SelfUpdateLock)
+            {
+                Library.Api.SetClientSelfVariableAsString(Connection, flag, value);
+                FlushClientSelfUpdates();
+                cache = value;
+            }
         }
 
         private void FlushClientSelfUpdates()
         {
-            // anything but threadsafe!
             if (Connection.Status != ConnectStatus.Disconnected)
             {
                 Task task;

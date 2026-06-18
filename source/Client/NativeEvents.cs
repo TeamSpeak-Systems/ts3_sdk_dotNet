@@ -5,11 +5,20 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if UNITY_IOS &&!UNITY_EDITOR
+public class MonoPInvokeCallbackAttribute : System.Attribute
+{
+    private Type type;
+    public MonoPInvokeCallbackAttribute( Type t ) { type = t; }
+}
+#endif
+
 namespace TeamSpeak.Sdk.Client
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct ClientUIFunctions
     {
+        public IntPtr OnMessage;
         public IntPtr OnConnectStatusChangeEvent;
         public IntPtr OnServerProtocolVersionEvent;
         public IntPtr OnNewChannelEvent;
@@ -47,125 +56,247 @@ namespace TeamSpeak.Sdk.Client
         public IntPtr OnEditPlaybackVoiceDataEvent;
         public IntPtr OnEditPostProcessVoiceDataEvent;
         public IntPtr OnEditMixedPlaybackVoiceDataEvent;
+#if !TEAMSPEAK_SDK_3_0
+        public IntPtr OnEditCapturedVoiceDataPreprocessEvent;
+#endif
         public IntPtr OnEditCapturedVoiceDataEvent;
         public IntPtr OnCustom3dRolloffCalculationClientEvent;
         public IntPtr OnCustom3dRolloffCalculationWaveEvent;
         public IntPtr OnUserLoggingMessageEvent;
         public IntPtr OnCustomPacketEncryptEvent;
         public IntPtr OnCustomPacketDecryptEvent;
-        public IntPtr OnProvisioningSlotRequestResultEvent;
         public IntPtr OnCheckServerUniqueIdentifierEvent;
         public IntPtr OnClientPasswordEncrypt;
         public IntPtr OnFileTransferStatusEvent;
         public IntPtr OnFileListEvent;
         public IntPtr OnFileListFinishedEvent;
         public IntPtr OnFileInfoEvent;
+        public IntPtr OnChatLoginTokenEvent;
+        public IntPtr OnAuthenticationTokenEvent;
+        public IntPtr OnScreenshareSessionEvent;
+        public IntPtr OnJsonReply;
+        public IntPtr OnSendCallToMatrix;
+        public IntPtr OnProtoResponse;
+        public IntPtr OnProtoEvent;
     }
 
-    class NativeEvents
+    partial class NativeEvents
     {
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnConnectStatusChangeEventHandler(ulong serverConnectionHandlerID, int newStatus, uint errorNumber);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerProtocolVersionEventHandler(ulong serverConnectionHandlerID, int protocolVersion);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnNewChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnNewChannelCreatedEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnDelChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelMoveEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong newChannelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnUpdateChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnUpdateChannelEditedEventHandler(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnUpdateClientEventHandler(ulong serverConnectionHandlerID, ushort clientID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientMoveEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr moveMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientMoveSubscriptionEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientMoveTimeoutEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr timeoutMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientMoveMovedEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort moverID, IntPtr moverName, IntPtr moverUniqueIdentifier, IntPtr moveMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientKickFromChannelEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientKickFromServerEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientIDsEventHandler(ulong serverConnectionHandlerID, IntPtr uniqueClientIdentifier, ushort clientID, IntPtr clientName);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientIDsFinishedEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerEditedEventHandler(ulong serverConnectionHandlerID, ushort editerID, IntPtr editerName, IntPtr editerUniqueIdentifier);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerUpdatedEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerErrorEventHandler(ulong serverConnectionHandlerID, IntPtr errorMessage, uint error, IntPtr returnCode, IntPtr extraMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerStopEventHandler(ulong serverConnectionHandlerID, IntPtr shutdownMessage);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnTextMessageEventHandler(ulong serverConnectionHandlerID, ushort targetMode, ushort toID, ushort fromID, IntPtr fromName, IntPtr fromUniqueIdentifier, IntPtr message);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnTalkStatusChangeEventHandler(ulong serverConnectionHandlerID, int status, int isReceivedWhisper, ushort clientID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnIgnoredWhisperEventHandler(ulong serverConnectionHandlerID, ushort clientID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnConnectionInfoEventHandler(ulong serverConnectionHandlerID, ushort clientID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnServerConnectionInfoEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelSubscribeEventHandler(ulong serverConnectionHandlerID, ulong channelID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelSubscribeFinishedEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelUnsubscribeEventHandler(ulong serverConnectionHandlerID, ulong channelID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelUnsubscribeFinishedEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelDescriptionUpdateEventHandler(ulong serverConnectionHandlerID, ulong channelID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnChannelPasswordChangedEventHandler(ulong serverConnectionHandlerID, ulong channelID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnPlaybackShutdownCompleteEventHandler(ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnSoundDeviceListChangedEventHandler(IntPtr modeID, int playOrCap);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnEditPlaybackVoiceDataEventHandler(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnEditPostProcessVoiceDataEventHandler(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnEditMixedPlaybackVoiceDataEventHandler(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnEditCapturedVoiceDataEventHandler(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int edited);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnCustom3dRolloffCalculationClientEventHandler(ulong serverConnectionHandlerID, ushort clientID, float distance, ref float volume);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnCustom3dRolloffCalculationWaveEventHandler(ulong serverConnectionHandlerID, ulong waveHandle, float distance, ref float volume);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnUserLoggingMessageEventHandler(IntPtr logmessage, int logLevel, IntPtr logChannel, ulong logID, IntPtr logTime, IntPtr completeLogString);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnCustomPacketEncryptEventHandler(ref IntPtr dataToSend, ref uint sizeOfData);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnCustomPacketDecryptEventHandler(ref IntPtr dataReceived, ref uint dataReceivedSize);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnProvisioningSlotRequestResultEventHandler(uint error, ulong requestHandle, IntPtr connectionKey);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnCheckServerUniqueIdentifierEventHandler(ulong serverConnectionHandlerID, IntPtr serverUniqueIdentifier, out bool cancelConnect);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnClientPasswordEncryptEventHandler(ulong serverConnectionHandlerID, IntPtr plaintext, IntPtr encryptedText, int encryptedTextByteSize);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnFileTransferStatusEventHandler(ushort transferID, uint status, IntPtr statusMessage, ulong remotefileSize, ulong serverConnectionHandlerID);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnFileListEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr path, IntPtr name, ulong size, ulong datetime, int type, ulong incompletesize, IntPtr returnCode);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnFileListFinishedEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr path);
-        [UnmanagedFunctionPointer(Native.CallingConvention)]
-        delegate void OnFileInfoEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr name, ulong size, ulong datetime);
+        #region delegates
 
+#if UNITY_EDITOR || !UNITY_ANDROID
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnMessageHandler(IntPtr msg);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnConnectStatusChangeEventHandler(ulong serverConnectionHandlerID, int newStatus, uint errorNumber);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerProtocolVersionEventHandler(ulong serverConnectionHandlerID, int protocolVersion);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnNewChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnNewChannelCreatedEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnDelChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelMoveEventHandler(ulong serverConnectionHandlerID, ulong channelID, ulong newChannelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnUpdateChannelEventHandler(ulong serverConnectionHandlerID, ulong channelID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnUpdateChannelEditedEventHandler(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnUpdateClientEventHandler(ulong serverConnectionHandlerID, ushort clientID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientMoveEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr moveMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientMoveSubscriptionEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientMoveTimeoutEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr timeoutMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientMoveMovedEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort moverID, IntPtr moverName, IntPtr moverUniqueIdentifier, IntPtr moveMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientKickFromChannelEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientKickFromServerEventHandler(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientIDsEventHandler(ulong serverConnectionHandlerID, IntPtr uniqueClientIdentifier, ushort clientID, IntPtr clientName);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientIDsFinishedEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerEditedEventHandler(ulong serverConnectionHandlerID, ushort editerID, IntPtr editerName, IntPtr editerUniqueIdentifier);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerUpdatedEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerErrorEventHandler(ulong serverConnectionHandlerID, IntPtr errorMessage, uint error, IntPtr returnCode, IntPtr extraMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerStopEventHandler(ulong serverConnectionHandlerID, IntPtr shutdownMessage);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnTextMessageEventHandler(ulong serverConnectionHandlerID, ushort targetMode, ushort toID, ushort fromID, IntPtr fromName, IntPtr fromUniqueIdentifier, IntPtr message);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnTalkStatusChangeEventHandler(ulong serverConnectionHandlerID, int status, int isReceivedWhisper, ushort clientID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnIgnoredWhisperEventHandler(ulong serverConnectionHandlerID, ushort clientID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnConnectionInfoEventHandler(ulong serverConnectionHandlerID, ushort clientID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnServerConnectionInfoEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelSubscribeEventHandler(ulong serverConnectionHandlerID, ulong channelID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelSubscribeFinishedEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelUnsubscribeEventHandler(ulong serverConnectionHandlerID, ulong channelID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelUnsubscribeFinishedEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelDescriptionUpdateEventHandler(ulong serverConnectionHandlerID, ulong channelID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnChannelPasswordChangedEventHandler(ulong serverConnectionHandlerID, ulong channelID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnPlaybackShutdownCompleteEventHandler(ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnSoundDeviceListChangedEventHandler(IntPtr modeID, int playOrCap);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnEditPlaybackVoiceDataEventHandler(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnEditPostProcessVoiceDataEventHandler(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnEditMixedPlaybackVoiceDataEventHandler(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask);
+#if !TEAMSPEAK_SDK_3_0
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnEditCapturedVoiceDataPreprocessEventHandler(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int flags);
+#endif
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnEditCapturedVoiceDataEventHandler(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int edited);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnCustom3dRolloffCalculationClientEventHandler(ulong serverConnectionHandlerID, ushort clientID, float distance, ref float volume);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnCustom3dRolloffCalculationWaveEventHandler(ulong serverConnectionHandlerID, ulong waveHandle, float distance, ref float volume);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnUserLoggingMessageEventHandler(IntPtr logmessage, int logLevel, IntPtr logChannel, ulong logID, IntPtr logTime, IntPtr completeLogString);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnCustomPacketEncryptEventHandler(ref IntPtr dataToSend, ref uint sizeOfData);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnCustomPacketDecryptEventHandler(ref IntPtr dataReceived, ref uint dataReceivedSize);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnCheckServerUniqueIdentifierEventHandler(ulong serverConnectionHandlerID, IntPtr serverUniqueIdentifier, out bool cancelConnect);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnClientPasswordEncryptEventHandler(ulong serverConnectionHandlerID, IntPtr plaintext, IntPtr encryptedText, int encryptedTextByteSize);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnFileTransferStatusEventHandler(ushort transferID, uint status, IntPtr statusMessage, ulong remotefileSize, ulong serverConnectionHandlerID);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnFileListEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr path, IntPtr name, ulong size, ulong datetime, int type, ulong incompletesize, IntPtr returnCode);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnFileListFinishedEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr path);
+#if UNITY_EDITOR || !UNITY_IOS
+        [UnmanagedFunctionPointer(Native.CallingConvention)]
+#endif
+        delegate void OnFileInfoEventHandler(ulong serverConnectionHandlerID, ulong channelID, IntPtr name, ulong size, ulong datetime);
+#endif
+        #endregion delegates
+
+#if UNITY_EDITOR || !UNITY_ANDROID
         public readonly ClientUIFunctions ClientUIFunctions;
+#endif
 
         /// <summary>
         /// This list ensures that the native event handlers are not garbage collected
@@ -173,6 +304,8 @@ namespace TeamSpeak.Sdk.Client
         private List<Delegate> DelegateReferences = new List<Delegate>();
         public NativeEvents(bool useClientPasswordEncrypt, bool useCustomPacketEncrypt, bool useCustomPacketDecrypt)
         {
+#if UNITY_EDITOR || !UNITY_ANDROID
+            SetNativeCallback(out ClientUIFunctions.OnMessage, new OnMessageHandler(OnMessageWrapper));
             SetNativeCallback(out ClientUIFunctions.OnConnectStatusChangeEvent, new OnConnectStatusChangeEventHandler(OnConnectStatusChangeEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnServerProtocolVersionEvent, new OnServerProtocolVersionEventHandler(OnServerProtocolVersionEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnNewChannelEvent, new OnNewChannelEventHandler(OnNewChannelEventWrapper));
@@ -189,7 +322,7 @@ namespace TeamSpeak.Sdk.Client
             SetNativeCallback(out ClientUIFunctions.OnClientKickFromChannelEvent, new OnClientKickFromChannelEventHandler(OnClientKickFromChannelEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnClientKickFromServerEvent, new OnClientKickFromServerEventHandler(OnClientKickFromServerEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnClientIDsEvent, new OnClientIDsEventHandler(OnClientIDsEventWrapper));
-            ClientUIFunctions.OnClientIDsFinishedEvent = IntPtr.Zero;
+            SetNativeCallback(out ClientUIFunctions.OnClientIDsFinishedEvent, new OnClientIDsFinishedEventHandler(OnClientIDsFinishedEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnServerEditedEvent, new OnServerEditedEventHandler(OnServerEditedEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnServerUpdatedEvent, new OnServerUpdatedEventHandler(OnServerUpdatedEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnServerErrorEvent, new OnServerErrorEventHandler(OnServerErrorEventWrapper));
@@ -197,8 +330,8 @@ namespace TeamSpeak.Sdk.Client
             SetNativeCallback(out ClientUIFunctions.OnTextMessageEvent, new OnTextMessageEventHandler(OnTextMessageEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnTalkStatusChangeEvent, new OnTalkStatusChangeEventHandler(OnTalkStatusChangeEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnIgnoredWhisperEvent, new OnIgnoredWhisperEventHandler(OnIgnoredWhisperEventWrapper));
-            ClientUIFunctions.OnConnectionInfoEvent = IntPtr.Zero;
-            ClientUIFunctions.OnServerConnectionInfoEvent = IntPtr.Zero;
+            SetNativeCallback(out ClientUIFunctions.OnConnectionInfoEvent, new OnConnectionInfoEventHandler(OnConnectionInfoEventWrapper));
+            SetNativeCallback(out ClientUIFunctions.OnServerConnectionInfoEvent, new OnServerConnectionInfoEventHandler(OnServerConnectionInfoEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnChannelSubscribeEvent, new OnChannelSubscribeEventHandler(OnChannelSubscribeEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnChannelSubscribeFinishedEvent, new OnChannelSubscribeFinishedEventHandler(OnChannelSubscribeFinishedEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnChannelUnsubscribeEvent, new OnChannelUnsubscribeEventHandler(OnChannelUnsubscribeEventWrapper));
@@ -210,6 +343,9 @@ namespace TeamSpeak.Sdk.Client
             SetNativeCallback(out ClientUIFunctions.OnEditPlaybackVoiceDataEvent, new OnEditPlaybackVoiceDataEventHandler(OnEditPlaybackVoiceDataEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnEditPostProcessVoiceDataEvent, new OnEditPostProcessVoiceDataEventHandler(OnEditPostProcessVoiceDataEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnEditMixedPlaybackVoiceDataEvent, new OnEditMixedPlaybackVoiceDataEventHandler(OnEditMixedPlaybackVoiceDataEventWrapper));
+#if !TEAMSPEAK_SDK_3_0
+            SetNativeCallback(out ClientUIFunctions.OnEditCapturedVoiceDataPreprocessEvent, new OnEditCapturedVoiceDataPreprocessEventHandler(OnEditCapturedVoiceDataPreprocessEventWrapper));
+#endif
             SetNativeCallback(out ClientUIFunctions.OnEditCapturedVoiceDataEvent, new OnEditCapturedVoiceDataEventHandler(OnEditCapturedVoiceDataEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnCustom3dRolloffCalculationClientEvent, new OnCustom3dRolloffCalculationClientEventHandler(OnCustom3dRolloffCalculationClientEventWrapper));
             SetNativeCallback(out ClientUIFunctions.OnCustom3dRolloffCalculationWaveEvent, new OnCustom3dRolloffCalculationWaveEventHandler(OnCustom3dRolloffCalculationWaveEventWrapper));
@@ -220,7 +356,6 @@ namespace TeamSpeak.Sdk.Client
             if (useCustomPacketDecrypt)
                 SetNativeCallback(out ClientUIFunctions.OnCustomPacketDecryptEvent, new OnCustomPacketDecryptEventHandler(OnCustomPacketDecryptEventWrapper));
             else ClientUIFunctions.OnCustomPacketDecryptEvent = IntPtr.Zero;
-            ClientUIFunctions.OnProvisioningSlotRequestResultEvent = IntPtr.Zero;
             SetNativeCallback(out ClientUIFunctions.OnCheckServerUniqueIdentifierEvent, new OnCheckServerUniqueIdentifierEventHandler(OnCheckServerUniqueIdentifierEventWrapper));
             if (useClientPasswordEncrypt)
                 SetNativeCallback(out ClientUIFunctions.OnClientPasswordEncrypt, new OnClientPasswordEncryptEventHandler(OnClientPasswordEncryptEventWrapper));
@@ -229,7 +364,14 @@ namespace TeamSpeak.Sdk.Client
             SetNativeCallback(out ClientUIFunctions.OnFileListEvent, new OnFileListEventHandler(OnFileListEventWrapper));
             ClientUIFunctions.OnFileListFinishedEvent = IntPtr.Zero;
             SetNativeCallback(out ClientUIFunctions.OnFileInfoEvent, new OnFileInfoEventHandler(OnFileInfoEventWrapper));
-
+            ClientUIFunctions.OnChatLoginTokenEvent = IntPtr.Zero;
+            ClientUIFunctions.OnAuthenticationTokenEvent = IntPtr.Zero;
+            ClientUIFunctions.OnScreenshareSessionEvent = IntPtr.Zero;
+            ClientUIFunctions.OnJsonReply = IntPtr.Zero;
+            ClientUIFunctions.OnSendCallToMatrix = IntPtr.Zero;
+            ClientUIFunctions.OnProtoResponse = IntPtr.Zero;
+            ClientUIFunctions.OnProtoEvent = IntPtr.Zero;
+#endif
         }
 
         private void SetNativeCallback(out IntPtr field, Delegate @delegate)
@@ -238,7 +380,9 @@ namespace TeamSpeak.Sdk.Client
             field = Marshal.GetFunctionPointerForDelegate(@delegate);
         }
 
-        private bool HandleException(Exception e)
+        /* il2cpp Unity ios doesn't support members, hence we're going static. */
+
+        private static bool HandleException(Exception e)
         {
             if (e is System.Threading.ThreadAbortException || e is System.Threading.ThreadInterruptedException)
                 return false;
@@ -246,7 +390,24 @@ namespace TeamSpeak.Sdk.Client
             return true;
         }
 
-        private void OnConnectStatusChangeEventWrapper(ulong serverConnectionHandlerID, int newStatus, uint errorNumber)
+        #region event_wrappers
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnMessageHandler))]
+#endif
+        private static void OnMessageWrapper(IntPtr msg)
+        {
+            try
+            {
+                Debug.WriteLine("[TeamSpeak] " + Native.ReadString(msg));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnConnectStatusChangeEventHandler))]
+#endif
+        private static void OnConnectStatusChangeEventWrapper(ulong serverConnectionHandlerID, int newStatus, uint errorNumber)
         {
             try
             {
@@ -255,7 +416,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnServerProtocolVersionEventWrapper(ulong serverConnectionHandlerID, int protocolVersion)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerProtocolVersionEventHandler))]
+#endif
+        private static void OnServerProtocolVersionEventWrapper(ulong serverConnectionHandlerID, int protocolVersion)
         {
             try
             {
@@ -264,7 +428,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnNewChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnNewChannelEventHandler))]
+#endif
+        private static void OnNewChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID)
         {
             try
             {
@@ -276,7 +443,7 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnNewChannelCreatedEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        private static void OnNewChannelCreated(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID, ushort invokerID, string invokerName, string invokerUniqueIdentifier)
         {
             try
             {
@@ -284,13 +451,24 @@ namespace TeamSpeak.Sdk.Client
                 Channel channel = connection.Cache.GetChannel(channelID);
                 connection.ChannelTracker.ChannelAdded(channel, channelParentID);
                 Client invoker = connection.Cache.GetClient(invokerID);
-                invoker?.Hint(Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+                invoker?.Hint(invokerName, invokerUniqueIdentifier);
                 connection.OnNewChannelCreated(channel, invoker);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnNewChannelCreatedEventHandler))]
+#endif
+        private static void OnNewChannelCreatedEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong channelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        {
+            try
+            {
+                OnNewChannelCreated(serverConnectionHandlerID, channelID, channelParentID, invokerID, Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnDelChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        private static void OnDelChannel(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, string invokerName, string invokerUniqueIdentifier)
         {
             try
             {
@@ -298,13 +476,24 @@ namespace TeamSpeak.Sdk.Client
                 Channel channel = connection.Cache.RemoveChannel(channelID);
                 connection.ChannelTracker.ChannelRemoved(channel);
                 Client invoker = connection.Cache.GetClient(invokerID);
-                invoker?.Hint(Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+                invoker?.Hint(invokerName, invokerUniqueIdentifier);
                 connection.OnChannelDeleted(channel, invoker);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnDelChannelEventHandler))]
+#endif
+        private static void OnDelChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        {
+            try
+            {
+                OnDelChannel(serverConnectionHandlerID, channelID, invokerID, Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnChannelMoveEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong newChannelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        private static void OnChannelMove(ulong serverConnectionHandlerID, ulong channelID, ulong newChannelParentID, ushort invokerID, string invokerName, string invokerUniqueIdentifier)
         {
             try
             {
@@ -312,13 +501,27 @@ namespace TeamSpeak.Sdk.Client
                 Channel channel = connection.Cache.GetChannel(channelID);
                 connection.ChannelTracker.ChannelMoved(channel, newChannelParentID);
                 Client invoker = connection.Cache.GetClient(invokerID);
-                invoker?.Hint(Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+                invoker?.Hint(invokerName, invokerUniqueIdentifier);
                 connection.OnChannelMoved(channel, invoker);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelMoveEventHandler))]
+#endif
+        private static void OnChannelMoveEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ulong newChannelParentID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        {
+            try
+            {
+                OnChannelMove(serverConnectionHandlerID, channelID, newChannelParentID, invokerID, Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnUpdateChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnUpdateChannelEventHandler))]
+#endif
+        private static void OnUpdateChannelEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
         {
             try
             {
@@ -330,33 +533,55 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnUpdateChannelEditedEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        private static void OnUpdateChannelEdited(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, string invokerName, string invokerUniqueIdentifier)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Client invoker = connection.Cache.GetClient(invokerID);
-                invoker?.Hint(Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+                invoker?.Hint(invokerName, invokerUniqueIdentifier);
                 Channel channel = connection.Cache.GetChannel(channelID);
                 connection.ChannelTracker.CheckOrder(channel);
                 connection.OnChannelChanged(channel, invoker);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnUpdateChannelEditedEventHandler))]
+#endif
+        private static void OnUpdateChannelEditedEventWrapper(ulong serverConnectionHandlerID, ulong channelID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        {
+            try
+            {
+                OnUpdateChannelEdited(serverConnectionHandlerID, channelID, invokerID, Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnUpdateClientEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        private static void OnUpdateClient(ulong serverConnectionHandlerID, ushort clientID, ushort invokerID, string invokerName, string invokerUniqueIdentifier)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Client invoker = connection.Cache.GetClient(invokerID);
-                invoker?.Hint(Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+                invoker?.Hint(invokerName, invokerUniqueIdentifier);
                 connection.OnClientUpdated(connection.Cache.GetClient(clientID), invoker);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnUpdateClientEventHandler))]
+#endif
+        private static void OnUpdateClientEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ushort invokerID, IntPtr invokerName, IntPtr invokerUniqueIdentifier)
+        {
+            try
+            {
+                OnUpdateClient(serverConnectionHandlerID, clientID, invokerID, Native.ReadString(invokerName), Native.ReadString(invokerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnClientMoveEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr moveMessage)
+        private static void OnClientMove(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, string moveMessage)
         {
             try
             {
@@ -369,12 +594,26 @@ namespace TeamSpeak.Sdk.Client
                     connection.Cache.GetChannel(newChannelID),
                     managed_Visibility,
                     client,
-                    Native.ReadString(moveMessage));
+                    moveMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientMoveEventHandler))]
+#endif
+        private static void OnClientMoveEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr moveMessage)
+        {
+            try
+            {
+                OnClientMove(serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, Native.ReadString(moveMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientMoveSubscriptionEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientMoveSubscriptionEventHandler))]
+#endif
+        private static void OnClientMoveSubscriptionEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility)
         {
             try
             {
@@ -389,7 +628,7 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientMoveTimeoutEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr timeoutMessage)
+        private static void OnClientMoveTimeout(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, string timeoutMessage)
         {
             try
             {
@@ -400,93 +639,175 @@ namespace TeamSpeak.Sdk.Client
                     connection.Cache.GetChannel(oldChannelID),
                     connection.Cache.GetChannel(newChannelID),
                     managed_Visibility,
-                    Native.ReadString(timeoutMessage));
+                    timeoutMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientMoveTimeoutEventHandler))]
+#endif
+        private static void OnClientMoveTimeoutEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, IntPtr timeoutMessage)
+        {
+            try
+            {
+                OnClientMoveTimeout(serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, Native.ReadString(timeoutMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientMoveMovedEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort moverID, IntPtr moverName, IntPtr moverUniqueIdentifier, IntPtr moveMessage)
+        private static void OnClientMoveMoved(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort moverID, string moverName, string moverUniqueIdentifier, string moveMessage)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Visibility managed_Visibility = (Visibility)visibility;
                 Client mover = connection.Cache.GetClient(moverID);
-                mover?.Hint(Native.ReadString(moverName), Native.ReadString(moverUniqueIdentifier));
+                mover?.Hint(moverName, moverUniqueIdentifier);
                 connection.OnClientMoved(
                     connection.Cache.GetOrRemoveClient(clientID, managed_Visibility),
                     connection.Cache.GetChannel(oldChannelID),
                     connection.Cache.GetChannel(newChannelID),
                     managed_Visibility,
                     mover,
-                    Native.ReadString(moveMessage));
+                    moveMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientMoveMovedEventHandler))]
+#endif
+        private static void OnClientMoveMovedEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort moverID, IntPtr moverName, IntPtr moverUniqueIdentifier, IntPtr moveMessage)
+        {
+            try
+            {
+                OnClientMoveMoved(serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moverID, Native.ReadString(moverName), Native.ReadString(moverUniqueIdentifier), Native.ReadString(moveMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientKickFromChannelEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage)
+        private static void OnClientKickFromChannel(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, string kickerName, string kickerUniqueIdentifier, string kickMessage)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Visibility managed_Visibility = (Visibility)visibility;
                 Client kicker = connection.Cache.GetClient(kickerID);
-                kicker?.Hint(Native.ReadString(kickerName), Native.ReadString(kickerUniqueIdentifier));
+                kicker?.Hint(kickerName, kickerUniqueIdentifier);
                 connection.OnClientKickedFromChannel(
                     connection.Cache.GetOrRemoveClient(clientID, managed_Visibility),
                     connection.Cache.GetChannel(oldChannelID),
                     connection.Cache.GetChannel(newChannelID),
                     managed_Visibility,
                     kicker,
-                    Native.ReadString(kickMessage));
+                    kickMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientKickFromChannelEventHandler))]
+#endif
+        private static void OnClientKickFromChannelEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage)
+        {
+            try
+            {
+                OnClientKickFromChannel(serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, Native.ReadString(kickerName), Native.ReadString(kickerUniqueIdentifier), Native.ReadString(kickMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientKickFromServerEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage)
+        private static void OnClientKickFromServer(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, string kickerName, string kickerUniqueIdentifier, string kickMessage)
         {
             try
             {
                 Connection connetion = Library.GetServer(serverConnectionHandlerID);
                 Visibility managed_Visibility = (Visibility)visibility;
                 Client kicker = connetion.Cache.GetClient(kickerID);
-                kicker?.Hint(Native.ReadString(kickerName), Native.ReadString(kickerUniqueIdentifier));
+                kicker?.Hint(kickerName, kickerUniqueIdentifier);
                 connetion.OnClientKickedFromServer(
                     connetion.Cache.GetOrRemoveClient(clientID, managed_Visibility),
                     connetion.Cache.GetChannel(oldChannelID),
                     connetion.Cache.GetChannel(newChannelID),
                     managed_Visibility,
                     kicker,
-                    Native.ReadString(kickMessage));
+                    kickMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientKickFromServerEventHandler))]
+#endif
+        private static void OnClientKickFromServerEventWrapper(ulong serverConnectionHandlerID, ushort clientID, ulong oldChannelID, ulong newChannelID, int visibility, ushort kickerID, IntPtr kickerName, IntPtr kickerUniqueIdentifier, IntPtr kickMessage)
+        {
+            try
+            {
+                OnClientKickFromServer(serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, Native.ReadString(kickerName), Native.ReadString(kickerUniqueIdentifier), Native.ReadString(kickMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientIDsEventWrapper(ulong serverConnectionHandlerID, IntPtr uniqueClientIdentifier, ushort clientID, IntPtr clientName)
+        private static void OnClientIDs(ulong serverConnectionHandlerID, string uniqueClientIdentifier, ushort clientID, string clientName)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Client client = connection.Cache.GetClient(clientID);
-                client?.Hint(Native.ReadString(uniqueClientIdentifier), Native.ReadString(clientName));
+                client?.Hint(uniqueClientIdentifier, clientName);
                 connection.OnClientIDReceived(client);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientIDsEventHandler))]
+#endif
+        private static void OnClientIDsEventWrapper(ulong serverConnectionHandlerID, IntPtr uniqueClientIdentifier, ushort clientID, IntPtr clientName)
+        {
+            try
+            {
+                OnClientIDs(serverConnectionHandlerID, Native.ReadString(uniqueClientIdentifier), clientID, Native.ReadString(clientName));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnServerEditedEventWrapper(ulong serverConnectionHandlerID, ushort editerID, IntPtr editerName, IntPtr editerUniqueIdentifier)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientIDsFinishedEventHandler))]
+#endif
+        private static void OnClientIDsFinishedEventWrapper(ulong serverConnectionHandlerID)
+        {
+            try
+            {
+                Connection connection = Library.GetServer(serverConnectionHandlerID);
+                // TODO
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+
+        private static void OnServerEdited(ulong serverConnectionHandlerID, ushort editerID, string editerName, string editerUniqueIdentifier)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 Client editer = connection.Cache.GetClient(editerID);
-                editer?.Hint(Native.ReadString(editerName), Native.ReadString(editerUniqueIdentifier));
+                editer?.Hint(editerName, editerUniqueIdentifier);
                 connection.OnServerUpdated(editer);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerEditedEventHandler))]
+#endif
+        private static void OnServerEditedEventWrapper(ulong serverConnectionHandlerID, ushort editerID, IntPtr editerName, IntPtr editerUniqueIdentifier)
+        {
+            try
+            {
+                OnServerEdited(serverConnectionHandlerID, editerID, Native.ReadString(editerName), Native.ReadString(editerUniqueIdentifier));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnServerUpdatedEventWrapper(ulong serverConnectionHandlerID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerUpdatedEventHandler))]
+#endif
+        private static void OnServerUpdatedEventWrapper(ulong serverConnectionHandlerID)
         {
             try
             {
@@ -496,53 +817,88 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnServerErrorEventWrapper(ulong serverConnectionHandlerID, IntPtr errorMessage, uint error, IntPtr returnCode, IntPtr extraMessage)
+        private static void OnServerError(ulong serverConnectionHandlerID, string errorMessage, uint error, string returnCode, string extraMessage)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
-                connection.OnServerError((Error)error, Native.ReadString(returnCode), Native.ReadString(extraMessage));
+                connection.OnServerError((Error)error, returnCode, extraMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerErrorEventHandler))]
+#endif
+        private static void OnServerErrorEventWrapper(ulong serverConnectionHandlerID, IntPtr errorMessage, uint error, IntPtr returnCode, IntPtr extraMessage)
+        {
+            try
+            {
+                OnServerError(serverConnectionHandlerID, Native.ReadString(errorMessage), error, Native.ReadString(returnCode), Native.ReadString(extraMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnServerStopEventWrapper(ulong serverConnectionHandlerID, IntPtr shutdownMessage)
+        private static void OnServerStop(ulong serverConnectionHandlerID, string shutdownMessage)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
-                connection.OnServerStop(Native.ReadString(shutdownMessage));
+                connection.OnServerStop(shutdownMessage);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerStopEventHandler))]
+#endif
+        private static void OnServerStopEventWrapper(ulong serverConnectionHandlerID, IntPtr shutdownMessage)
+        {
+            try
+            {
+                OnServerStop(serverConnectionHandlerID, Native.ReadString(shutdownMessage));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnTextMessageEventWrapper(ulong serverConnectionHandlerID, ushort targetMode, ushort toID, ushort fromID, IntPtr fromName, IntPtr fromUniqueIdentifier, IntPtr message)
+        private static void OnTextMessage(ulong serverConnectionHandlerID, ushort targetMode, ushort toID, ushort fromID, string fromName, string fromUniqueIdentifier, string message)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
-                string managed_message = Native.ReadString(message);
                 Client from = connection.Cache.GetClient(fromID);
-                from?.Hint(Native.ReadString(fromName), Native.ReadString(fromUniqueIdentifier));
+                from?.Hint(fromName, fromUniqueIdentifier);
                 switch ((TargetMode)targetMode)
                 {
                     case TargetMode.Client:
                         Client to = connection.Cache.GetClient(toID);
-                        connection.OnClientMessage(from, to, managed_message);
+                        connection.OnClientMessage(from, to, message);
                         break;
                     case TargetMode.Channel:
-                        connection.OnChannelMessage(from, managed_message);
+                        connection.OnChannelMessage(from, message);
                         break;
                     case TargetMode.Server:
-                        connection.OnServerMessage(from, managed_message);
+                        connection.OnServerMessage(from, message);
                         break;
                     default: goto case TargetMode.Server;
                 }
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnTextMessageEventHandler))]
+#endif
+        private static void OnTextMessageEventWrapper(ulong serverConnectionHandlerID, ushort targetMode, ushort toID, ushort fromID, IntPtr fromName, IntPtr fromUniqueIdentifier, IntPtr message)
+        {
+            try
+            {
+                OnTextMessage(serverConnectionHandlerID, targetMode, toID, fromID, Native.ReadString(fromName), Native.ReadString(fromUniqueIdentifier), Native.ReadString(message));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnTalkStatusChangeEventWrapper(ulong serverConnectionHandlerID, int status, int isReceivedWhisper, ushort clientID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnTalkStatusChangeEventHandler))]
+#endif
+        private static void OnTalkStatusChangeEventWrapper(ulong serverConnectionHandlerID, int status, int isReceivedWhisper, ushort clientID)
         {
             try
             {
@@ -555,7 +911,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnIgnoredWhisperEventWrapper(ulong serverConnectionHandlerID, ushort clientID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnIgnoredWhisperEventHandler))]
+#endif
+        private static void OnIgnoredWhisperEventWrapper(ulong serverConnectionHandlerID, ushort clientID)
         {
             try
             {
@@ -565,7 +924,26 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelSubscribeEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnConnectionInfoEventHandler))]
+#endif
+        private static void OnConnectionInfoEventWrapper(ulong serverConnectionHandlerID, ushort clientID)
+        {
+            // TODO
+        }
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnServerConnectionInfoEventHandler))]
+#endif
+        private static void OnServerConnectionInfoEventWrapper(ulong serverConnectionHandlerID)
+        {
+            // TODO
+        }
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelSubscribeEventHandler))]
+#endif
+        private static void OnChannelSubscribeEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
         {
             try
             {
@@ -575,7 +953,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelSubscribeFinishedEventWrapper(ulong serverConnectionHandlerID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelSubscribeFinishedEventHandler))]
+#endif
+        private static void OnChannelSubscribeFinishedEventWrapper(ulong serverConnectionHandlerID)
         {
             try
             {
@@ -585,7 +966,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelUnsubscribeEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelUnsubscribeEventHandler))]
+#endif
+        private static void OnChannelUnsubscribeEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
         {
             try
             {
@@ -595,7 +979,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelUnsubscribeFinishedEventWrapper(ulong serverConnectionHandlerID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelUnsubscribeFinishedEventHandler))]
+#endif
+        private static void OnChannelUnsubscribeFinishedEventWrapper(ulong serverConnectionHandlerID)
         {
             try
             {
@@ -605,7 +992,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelDescriptionUpdateEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelDescriptionUpdateEventHandler))]
+#endif
+        private static void OnChannelDescriptionUpdateEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
         {
             try
             {
@@ -615,7 +1005,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnChannelPasswordChangedEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnChannelPasswordChangedEventHandler))]
+#endif
+        private static void OnChannelPasswordChangedEventWrapper(ulong serverConnectionHandlerID, ulong channelID)
         {
             try
             {
@@ -625,7 +1018,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnPlaybackShutdownCompleteEventWrapper(ulong serverConnectionHandlerID)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnPlaybackShutdownCompleteEventHandler))]
+#endif
+        private static void OnPlaybackShutdownCompleteEventWrapper(ulong serverConnectionHandlerID)
         {
             try
             {
@@ -635,16 +1031,30 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnSoundDeviceListChangedEventWrapper(IntPtr modeID, int playOrCap)
+        private static void OnSoundDeviceListChanged(string modeID, int playOrCap)
         {
             try
             {
-                Library.OnSoundDeviceListChanged(Native.ReadString(modeID), playOrCap != 0);
+                Library.OnSoundDeviceListChanged(modeID, playOrCap != 0);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnSoundDeviceListChangedEventHandler))]
+#endif
+        private static void OnSoundDeviceListChangedEventWrapper(IntPtr modeID, int playOrCap)
+        {
+            try
+            {
+                OnSoundDeviceListChanged(Native.ReadString(modeID), playOrCap);
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnEditPlaybackVoiceDataEventWrapper(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnEditPlaybackVoiceDataEventHandler))]
+#endif
+        private static void OnEditPlaybackVoiceDataEventWrapper(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels)
         {
             try
             {
@@ -654,7 +1064,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnEditPostProcessVoiceDataEventWrapper(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnEditPostProcessVoiceDataEventHandler))]
+#endif
+        private static void OnEditPostProcessVoiceDataEventWrapper(ulong serverConnectionHandlerID, ushort clientID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask)
         {
             try
             {
@@ -666,7 +1079,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnEditMixedPlaybackVoiceDataEventWrapper(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnEditMixedPlaybackVoiceDataEventHandler))]
+#endif
+        private static void OnEditMixedPlaybackVoiceDataEventWrapper(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, IntPtr channelSpeakerArray, ref Speakers channelFillMask)
         {
             try
             {
@@ -676,7 +1092,35 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnEditCapturedVoiceDataEventWrapper(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int edited)
+        #region sdk_3_1
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnEditCapturedVoiceDataPreprocessEventHandler))]
+#endif
+        private static void OnEditCapturedVoiceDataPreprocessEventWrapper(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int flags)
+        {
+            // TODO
+            try
+            {
+                Library.GetServer(serverConnectionHandlerID).OnEditCapturedVoiceDataPreprocess(
+                    samples, sampleCount, channels,
+                    ref flags);
+                /*
+                bool managed_edited = (flags & 1) == 1;
+                bool managed_cancel = (flags & 2) == 0;
+                Library.GetServer(serverConnectionHandlerID).OnEditCapturedVoiceDataPreprocess(
+                    samples, sampleCount, channels,
+                    ref managed_edited, ref managed_cancel);
+                flags = (managed_edited ? 1 : 0) | (managed_cancel ? 0 : 2);
+                */
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+        #endregion sdk_3_1
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnEditCapturedVoiceDataEventHandler))]
+#endif
+        private static void OnEditCapturedVoiceDataEventWrapper(ulong serverConnectionHandlerID, IntPtr samples, int sampleCount, int channels, ref int edited)
         {
             try
             {
@@ -690,7 +1134,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnCustom3dRolloffCalculationClientEventWrapper(ulong serverConnectionHandlerID, ushort clientID, float distance, ref float volume)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnCustom3dRolloffCalculationClientEventHandler))]
+#endif
+        private static void OnCustom3dRolloffCalculationClientEventWrapper(ulong serverConnectionHandlerID, ushort clientID, float distance, ref float volume)
         {
             try
             {
@@ -700,7 +1147,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnCustom3dRolloffCalculationWaveEventWrapper(ulong serverConnectionHandlerID, ulong waveHandle, float distance, ref float volume)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnCustom3dRolloffCalculationWaveEventHandler))]
+#endif
+        private static void OnCustom3dRolloffCalculationWaveEventWrapper(ulong serverConnectionHandlerID, ulong waveHandle, float distance, ref float volume)
         {
             try
             {
@@ -710,17 +1160,31 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnUserLoggingMessageEventWrapper(IntPtr logmessage, int logLevel, IntPtr logChannel, ulong logID, IntPtr logTime, IntPtr completeLogString)
+        private static void OnUserLoggingMessage(string logmessage, int logLevel, string logChannel, ulong logID, string logTime, string completeLogString)
         {
             try
             {
                 Connection connection = Library.GetServer(logID);
-                Library.OnUserLoggingMessage(Native.ReadString(logmessage), (LogLevel)logLevel, Native.ReadString(logChannel), connection, Native.ReadString(logTime), Native.ReadString(completeLogString));
+                Library.OnUserLoggingMessage(logmessage, (LogLevel)logLevel, logChannel, connection, logTime, completeLogString);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnUserLoggingMessageEventHandler))]
+#endif
+        private static void OnUserLoggingMessageEventWrapper(IntPtr logmessage, int logLevel, IntPtr logChannel, ulong logID, IntPtr logTime, IntPtr completeLogString)
+        {
+            try
+            {
+                OnUserLoggingMessage(Native.ReadString(logmessage), logLevel, Native.ReadString(logChannel), logID, Native.ReadString(logTime), Native.ReadString(completeLogString));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnCustomPacketEncryptEventWrapper(ref IntPtr dataToSend, ref uint sizeOfData)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnCustomPacketEncryptEventHandler))]
+#endif
+        private static void OnCustomPacketEncryptEventWrapper(ref IntPtr dataToSend, ref uint sizeOfData)
         {
             try
             {
@@ -729,7 +1193,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnCustomPacketDecryptEventWrapper(ref IntPtr dataReceived, ref uint dataReceivedSize)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnCustomPacketDecryptEventHandler))]
+#endif
+        private static void OnCustomPacketDecryptEventWrapper(ref IntPtr dataReceived, ref uint dataReceivedSize)
         {
             try
             {
@@ -738,7 +1205,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnCheckServerUniqueIdentifierEventWrapper(ulong serverConnectionHandlerID, IntPtr serverUniqueIdentifier, out bool cancelConnect)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnCheckServerUniqueIdentifierEventHandler))]
+#endif
+        private static void OnCheckServerUniqueIdentifierEventWrapper(ulong serverConnectionHandlerID, IntPtr serverUniqueIdentifier, out bool cancelConnect)
         {
             try
             {
@@ -748,7 +1218,10 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { cancelConnect = true; if (HandleException(e) == false) throw; }
         }
 
-        private void OnClientPasswordEncryptEventWrapper(ulong serverConnectionHandlerID, IntPtr plaintext, IntPtr encryptedText, int encryptedTextByteSize)
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnClientPasswordEncryptEventHandler))]
+#endif
+        private static void OnClientPasswordEncryptEventWrapper(ulong serverConnectionHandlerID, IntPtr plaintext, IntPtr encryptedText, int encryptedTextByteSize)
         {
             try
             {
@@ -759,7 +1232,7 @@ namespace TeamSpeak.Sdk.Client
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnFileTransferStatusEventWrapper(ushort transferID, uint status, IntPtr statusMessage, ulong remotefileSize, ulong serverConnectionHandlerID)
+        private static void OnFileTransferStatus(ushort transferID, uint status, string statusMessage, ulong remotefileSize, ulong serverConnectionHandlerID)
         {
             try
             {
@@ -768,37 +1241,92 @@ namespace TeamSpeak.Sdk.Client
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnFileTransferStatusEventHandler))]
+#endif
+        private static void OnFileTransferStatusEventWrapper(ushort transferID, uint status, IntPtr statusMessage, ulong remotefileSize, ulong serverConnectionHandlerID)
+        {
+            try
+            {
+                OnFileTransferStatus(transferID, status, Native.ReadString(statusMessage), remotefileSize, serverConnectionHandlerID);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
 
-        private void OnFileListEventWrapper(ulong serverConnectionHandlerID, ulong channelID, IntPtr path, IntPtr name, ulong size, ulong datetime, int type, ulong incompletesize, IntPtr returnCode)
+        private static void OnFileList(ulong serverConnectionHandlerID, ulong channelID, string path, string name, ulong size, ulong datetime, int type, ulong incompletesize, string returnCode)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 connection.OnFileListReceived(
                     connection.Cache.GetChannel(channelID),
-                    Native.ReadString(path),
-                    Native.ReadString(name),
+                    path,
+                    name,
                     size,
                     Native.FromUnixTime(datetime),
                     (FileListType)type,
                     incompletesize,
-                    Native.ReadString(returnCode));
+                    returnCode);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnFileListEventHandler))]
+#endif
+        private static void OnFileListEventWrapper(ulong serverConnectionHandlerID, ulong channelID, IntPtr path, IntPtr name, ulong size, ulong datetime, int type, ulong incompletesize, IntPtr returnCode)
+        {
+            try
+            {
+                OnFileList(serverConnectionHandlerID, channelID, Native.ReadString(path), Native.ReadString(name), size, datetime, type, incompletesize, Native.ReadString(returnCode));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
 
-        private void OnFileInfoEventWrapper(ulong serverConnectionHandlerID, ulong channelID, IntPtr name, ulong size, ulong datetime)
+        private static void OnFileListFinished(ulong serverConnectionHandlerID, ulong channelID, string path)
+        {
+            try
+            {
+                // TODO
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnFileListFinishedEventHandler))]
+#endif
+        private static void OnFileListFinishedEventWrapper(ulong serverConnectionHandlerID, ulong channelID, IntPtr path)
+        {
+            try
+            {
+                OnFileListFinished(serverConnectionHandlerID, channelID, Native.ReadString(path));
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+
+        private static void OnFileInfo(ulong serverConnectionHandlerID, ulong channelID, string name, ulong size, ulong datetime)
         {
             try
             {
                 Connection connection = Library.GetServer(serverConnectionHandlerID);
                 connection.OnFileInfoReceived(
                     connection.Cache.GetChannel(channelID),
-                    Native.ReadString(name),
+                    name,
                     size,
                     Native.FromUnixTime(datetime));
             }
             catch (Exception e) { if (HandleException(e) == false) throw; }
         }
+#if UNITY_IOS && !UNITY_EDITOR
+        [MonoPInvokeCallback (typeof (OnFileInfoEventHandler))]
+#endif
+        private static void OnFileInfoEventWrapper(ulong serverConnectionHandlerID, ulong channelID, IntPtr name, ulong size, ulong datetime)
+        {
+            try
+            {
+                OnFileInfo(serverConnectionHandlerID, channelID, Native.ReadString(name), size, datetime);
+            }
+            catch (Exception e) { if (HandleException(e) == false) throw; }
+        }
+
+        #endregion
     }
 }
